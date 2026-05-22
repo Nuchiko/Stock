@@ -130,7 +130,7 @@
   </table>
   <div class="note-section">
     <label>&#128221; &#3627;&#3617;&#3634;&#3618;&#3648;&#3627;&#3605;&#3640;</label>
-    <textarea id="noteInput" placeholder="&#3585;&#3619;&#3629;&#3585;&#3634;&#3621;&#3632;&#3648;&#3629;&#3637;&#3618;&#3604;&#3656;&#3617;&#3648;&#3617; (&#3606;&#3657;&#3634;&#3617;&#3637;)"></textarea>
+    <textarea id="noteInput" placeholder="&#3585;&#3619;&#3629;&#3585;&#3619;&#3634;&#3618;&#3621;&#3632;&#3648;&#3629;&#3637;&#3618;&#3604;&#3648;&#3614;&#3636;&#3656;&#3617;&#3648;&#3605;&#3636;&#3617; (&#3606;&#3657;&#3634;&#3617;&#3637;)"></textarea>
   </div>
   <div class="btn-row">
     <button class="btn-send" onclick="sendData()">&#3626;&#3656;&#3591;&#3586;&#3657;&#3629;&#3617;&#3641;&#3621;</button>
@@ -146,7 +146,7 @@
   function getThaiDate() {
     var now = new Date();
     var days = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
-    var months = ['มกราคม','กุกภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุษาคม','พฤศจิกายน','ธันวาคม'];
+    var months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
     var day = days[now.getDay()];
     var date = now.getDate();
     var month = months[now.getMonth()];
@@ -154,7 +154,7 @@
     var hh = String(now.getHours()).padStart(2,'0');
     var mm = String(now.getMinutes()).padStart(2,'0');
     var ss = String(now.getSeconds()).padStart(2,'0');
-    return 'wan' + day + 'ที่ ' + date + ' ' + month + ' ' + year + '  ' + hh + ':' + mm + ':' + ss;
+    return 'วัน' + day + 'ที่ ' + date + ' ' + month + ' ' + year + '  ' + hh + ':' + mm + ':' + ss;
   }
   document.getElementById('dateDisplay').textContent = getThaiDate();
   setInterval(function() {
@@ -189,7 +189,7 @@
     var date = document.getElementById('dateDisplay').textContent;
     var btn = document.querySelector('.btn-send');
     btn.disabled = true;
-    btn.textContent = 'ชาลิเหง...';
+    btn.textContent = 'กำลังส่ง...';
 
     html2canvas(document.getElementById('captureArea'), {
       scale: 1.5,
@@ -197,18 +197,18 @@
       backgroundColor: '#ffffff',
       logging: false
     }).then(function(canvas) {
-      var imageBase64 = canvas.toDateURL�image/jpeg', 0.85).split(',')[1];
+      var imageBase64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
       fetch(SHEET_URL, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ date: date, rows: rows, note: note, imageBase64: imageBase64 })
       }).then(function() {
-        alert('ส่งข้อมูลก้อเรฎส่ม! ✅\nบันนุฅ Google Drive แล');
+        alert('ส่งข้อมูลเรียบร้อยแล้ว! ✅\nบันทึกลง Google Drive แล้ว');
         btn.disabled = false;
         btn.textContent = 'ส่งข้อมูล';
       }).catch(function(err) {
-        alert('เทจ่นั: ມ\n' + err.message);
+        alert('เกิดข้อผิดพลาด ❌\n' + err.message);
         btn.disabled = false;
         btn.textContent = 'ส่งข้อมูล';
       });
@@ -219,7 +219,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ date: date, rows: rows, note: note })
       }).then(function() {
-        alert('ส่งข้อมูล เรฎ! ✅');
+        alert('ส่งข้อมูลเรียบร้อย! ✅');
         btn.disabled = false;
         btn.textContent = 'ส่งข้อมูล';
       });
