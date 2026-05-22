@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stock Daily</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -138,7 +139,7 @@
   </style>
 </head>
 <body>
-<div class="container">
+<div class="container" id="captureArea">
   <div class="header">
     <h1>📋 Stock Daily</h1>
     <div class="date" id="dateDisplay"></div>
@@ -174,12 +175,10 @@
     'Aori Ika', 'Hokkigai', 'Ikura', 'Hotate'
   ];
 
-  // แสดงวันที่ภาษาไทย
-  function getThaiDate() {
+  // แಪดงวั�นที่ภาษาไทย  function getThaiDate() {
     const now = new Date();
-    const days = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
-    const months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
-                    'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+    const days = ['อาทิตฮ์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+    const months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
     const day = days[now.getDay()];
     const date = now.getDate();
     const month = months[now.getMonth()];
@@ -187,7 +186,7 @@
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
     const ss = String(now.getSeconds()).padStart(2, '0');
-    return `วัน${day}ที่ ${date} ${month} ${year}  ${hh}:${mm}:${ss}`;
+    return `wan${day}ที่ ${date} ${month} ${year}  ${hh}:${mm}:${ss}`;
   }
   document.getElementById('dateDisplay').textContent = getThaiDate();
   setInterval(() => {
@@ -209,9 +208,9 @@
   });
 
   // ส่งข้อมูล
-  const SHEET_URL = 'https://script.google.com/macros/s/AKfycby0tNfxuwJVdq7j9WMXvdBbSXWsu4md7tyBHSkceykHg1xbenltdwTE265lO3jui7A6Xg/exec';
+  const SHEET_URL = 'https://script.google.com/macros/res/AKfycby0tNfxuwJVdq7j9WMXvdBbSXWsu4md7tyBHSkceykHg1xbenltdwTE265lO3jui7A6Xg/exec';
 
-  function sendData() {
+  async function sendData() {
     const rows = items.map((item, i) => ({
       item,
       old: document.getElementById(`old_${i}`).value,
@@ -226,15 +225,28 @@
     btn.disabled = true;
     btn.textContent = 'ชาลิเหง...';
 
+    // ตทวฒ screenshot ของโทนูล
+    let imageBase64 = null;
+    try {
+      const canvas = await html2canvas(document.getElementById('captureArea'), {
+        scale: 1.5,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false
+      });
+      imageBase64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+    } catch(e) {
+      console.warn('Screenshot failed:', e);
+    }
+
     fetch(SHEET_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date, rows, note })
+      body: JSON.stringify({ date, rows, note, imageBase64 })
     })
     .then(() => {
-      alert('ส่งข้อมูล เรฎส่ม! ✅]นับนุฅ Google Sheet แล;
-
+      alert('ส่งข้อมูลก้อเรฎส่ม! ✅\nบันนุฅ Google Drive แล');
       btn.disabled = false;
       btn.textContent = 'ส่งข้อมูล';
     })
