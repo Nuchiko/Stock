@@ -21,7 +21,7 @@
       border-radius: 16px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
       width: 100%;
-      max-width: 820px;
+      max-width: 860px;
       overflow: hidden;
     }
     .header {
@@ -128,8 +128,8 @@
         <th>&#3586;&#3629;&#3591;&#3648;&#3604;&#3636;&#3617;</th>
         <th>&#3586;&#3629;&#3591;&#3648;&#3586;&#3657;&#3634;</th>
         <th>&#3605;&#3633;&#3604;&#3649;&#3605;&#3656;&#3591;</th>
-        <th>&#3651;&#3594;&#3657;&#3652;&#3611;</th>
         <th>&#3648;&#3627;&#3621;&#3639;&#3629;</th>
+        <th>&#3651;&#3594;&#3657;&#3652;&#3611;</th>
       </tr>
     </thead>
     <tbody id="stockBody"></tbody>
@@ -151,7 +151,7 @@
 
   function getThaiDate() {
     var now = new Date();
-    var days = ['\u0E2D\u0E32\u0E17\u0E34\u0E15\u0E22\u0E4C','\u0E08\u0E31\u0E19\u0E17\u0E23\u0E4C','\u0E2D\u0E31\u0E07\u0E04\u0E32\u0E23','\u0E1E\u0E38\u0E18','\u0E1E\u0E24\u0E2B\u0E31\u0E2A\u0E1A\u0E14\u0E35','\u0E28\u0E38\u0E01\u0E23\u0E4C','\u0E40\u0E2A\u0E32\u0E23\u0E4C'];
+    var days = ['\u0E2D\u0E32\u0E17\u0E34\u0E15\u0E22\u0E4C','\u0E08\u0E31\u0E19\u0E17\u0E23\u0E4C','\u0E2D\u0E31\u0E07\u0E04\u0E32\u0E23','\u0E1E\u0E38\u0E18','\u0E1E\u0E24\u0E2B\u0E31\u0E2A\u0E1B\u0E14\u0E35','\u0E28\u0E38\u0E01\u0E23\u0E4C','\u0E40\u0E2A\u0E32\u0E23\u0E4C'];
     var months = ['\u0E21\u0E01\u0E23\u0E32\u0E04\u0E21','\u0E01\u0E38\u0E21\u0E20\u0E32\u0E1E\u0E31\u0E19\u0E18\u0E4C','\u0E21\u0E35\u0E19\u0E32\u0E04\u0E21','\u0E40\u0E21\u0E29\u0E32\u0E22\u0E19','\u0E1E\u0E24\u0E29\u0E20\u0E32\u0E04\u0E21','\u0E21\u0E34\u0E16\u0E38\u0E19\u0E32\u0E22\u0E19','\u0E01\u0E23\u0E01\u0E0E\u0E32\u0E04\u0E21','\u0E2A\u0E34\u0E07\u0E2B\u0E32\u0E04\u0E21','\u0E01\u0E31\u0E19\u0E22\u0E32\u0E22\u0E19','\u0E15\u0E38\u0E25\u0E32\u0E04\u0E21','\u0E1E\u0E24\u0E28\u0E08\u0E34\u0E01\u0E32\u0E22\u0E19','\u0E18\u0E31\u0E19\u0E27\u0E32\u0E04\u0E21'];
     var day = days[now.getDay()];
     var date = now.getDate();
@@ -175,12 +175,15 @@
       var op = parseInt(document.getElementById('old_' + i + '_pc').value) || 0;
       var ib = parseInt(document.getElementById('in_' + i + '_box').value) || 0;
       var ip = parseInt(document.getElementById('in_' + i + '_pc').value) || 0;
-      cell.textContent = (ob+ib) + '\u0E01\u0E25\u0E48\u0E2D\u0E07 ' + (op+ip) + '\u0E15\u0E31\u0E27';
+      var rb = parseInt(document.getElementById('rem_' + i + '_box').value) || 0;
+      var rp = parseInt(document.getElementById('rem_' + i + '_pc').value) || 0;
+      cell.textContent = (ob+ib-rb) + '\u0E01\u0E25\u0E48\u0E2D\u0E07 ' + (op+ip-rp) + '\u0E15\u0E31\u0E27';
     } else {
       var o = parseInt(document.getElementById('old_' + i).value) || 0;
       var n = parseInt(document.getElementById('in_' + i).value) || 0;
       var c = parseInt(document.getElementById('cut_' + i).value) || 0;
-      cell.textContent = o + n - c;
+      var r = parseInt(document.getElementById('rem_' + i).value) || 0;
+      cell.textContent = o + n - c - r;
     }
   }
 
@@ -205,16 +208,16 @@
         hotateCell('old_' + i, false, i) +
         hotateCell('in_' + i, false, i) +
         '<td></td>' +
-        '<td id="used_' + i + '" class="used-cell" style="font-size:0.85rem;">0\u0E01\u0E25\u0E48\u0E2D\u0E07 0\u0E15\u0E31\u0E27</td>' +
-        hotateCell('rem_' + i, true);
+        hotateCell('rem_' + i, true, i) +
+        '<td id="used_' + i + '" class="used-cell" style="font-size:0.85rem;">0\u0E01\u0E25\u0E48\u0E2D\u0E07 0\u0E15\u0E31\u0E27</td>';
     } else {
       tr.innerHTML =
         '<td>' + item + '</td>' +
         '<td><input type="number" id="old_' + i + '" value="0" min="0" oninput="calcUsed(' + i + ',false)"></td>' +
         '<td><input type="number" id="in_' + i + '" value="0" min="0" oninput="calcUsed(' + i + ',false)"></td>' +
         '<td><input type="number" id="cut_' + i + '" value="0" min="0" oninput="calcUsed(' + i + ',false)"></td>' +
-        '<td id="used_' + i + '" class="used-cell">0</td>' +
-        '<td><input type="number" id="rem_' + i + '" value="0" min="0" style="background:#d8f3dc;font-weight:700;color:#1b4332;"></td>';
+        '<td><input type="number" id="rem_' + i + '" value="0" min="0" oninput="calcUsed(' + i + ',false)" style="background:#d8f3dc;font-weight:700;color:#1b4332;"></td>' +
+        '<td id="used_' + i + '" class="used-cell">0</td>';
     }
     tbody.appendChild(tr);
   });
@@ -237,8 +240,8 @@
         old: getVal('old_' + i),
         in:  getVal('in_' + i),
         cut: getVal('cut_' + i),
-        used: usedCell ? usedCell.textContent : '0',
-        rem: getVal('rem_' + i)
+        rem: getVal('rem_' + i),
+        used: usedCell ? usedCell.textContent : '0'
       };
     });
     var note = document.getElementById('noteInput').value;
@@ -260,7 +263,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ date: date, rows: rows, note: note, imageBase64: imageBase64 })
       }).then(function() {
-        alert('\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E40\u0E23\u0E35\u0E22\u0E1A\u0E23\u0E49\u0E2D\u0E22\u0E41\u0E25\u0E49\u0E27! \u2705\n\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E25\u0E07 Google Drive \u0E41\u0E25\u0E49\u0E27');
+        alert('\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E40\u0E23\u0E35\u0E22\u0E1A\u0E23\u0E49\u0E2D\u0E22\u0E41\u0E25\u0E49\u0E27! \u2705\n\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E25\u0E09 Google Drive \u0E41\u0E25\u0E49\u0E27');
         btn.disabled = false;
         btn.textContent = '\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25';
       }).catch(function(err) {
