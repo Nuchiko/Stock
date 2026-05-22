@@ -30,20 +30,9 @@
       text-align: center;
       padding: 20px 16px 14px;
     }
-    .header h1 {
-      font-size: 1.6rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
-    .header .date {
-      font-size: 0.95rem;
-      margin-top: 4px;
-      opacity: 0.85;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
+    .header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: 1px; }
+    .header .date { font-size: 0.95rem; margin-top: 4px; opacity: 0.85; }
+    table { width: 100%; border-collapse: collapse; }
     thead th {
       background: #40916c;
       color: #fff;
@@ -80,20 +69,7 @@
       border-color: #40916c;
       box-shadow: 0 0 0 2px rgba(64,145,108,0.2);
     }
-    .result {
-      background: #d8f3dc;
-      color: #1b4332;
-      font-weight: 700;
-      font-size: 1rem;
-      min-width: 60px;
-      display: inline-block;
-      border-radius: 6px;
-      padding: 4px 10px;
-    }
-    .note-section {
-      padding: 16px;
-      border-top: 2px solid #e0e0e0;
-    }
+    .note-section { padding: 16px; border-top: 2px solid #e0e0e0; }
     .note-section label {
       display: flex;
       align-items: center;
@@ -119,11 +95,7 @@
       border-color: #40916c;
       box-shadow: 0 0 0 2px rgba(64,145,108,0.2);
     }
-    .btn-row {
-      padding: 14px 16px;
-      display: flex;
-      justify-content: flex-end;
-    }
+    .btn-row { padding: 14px 16px; display: flex; justify-content: flex-end; }
     .btn-send {
       background: #2d6a4f;
       color: #fff;
@@ -141,119 +113,116 @@
 <body>
 <div class="container" id="captureArea">
   <div class="header">
-    <h1>📋 Stock Daily</h1>
+    <h1>&#128203; Stock Daily</h1>
     <div class="date" id="dateDisplay"></div>
   </div>
-
   <table>
     <thead>
       <tr>
-        <th>รายการ</th>
-        <th>ของเดิม</th>
-        <th>ของเข้า</th>
-        <th>ตัดแต่ง</th>
-        <th>เหลือ</th>
+        <th>&#3619;&#3634;&#3618;&#3585;&#3634;&#3619;</th>
+        <th>&#3586;&#3629;&#3591;&#3648;&#3604;&#3636;&#3617;</th>
+        <th>&#3586;&#3629;&#3591;&#3648;&#3586;&#3657;&#3634;</th>
+        <th>&#3605;&#3633;&#3604;&#3649;&#3605;&#3656;&#3591;</th>
+        <th>&#3648;&#3627;&#3621;&#3639;&#3629;</th>
       </tr>
     </thead>
-    <tbody id="stockBody">
-    </tbody>
+    <tbody id="stockBody"></tbody>
   </table>
-
   <div class="note-section">
-    <label>📝 หมายเหตุ</label>
-    <textarea id="noteInput" placeholder="กรอกรายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
+    <label>&#128221; &#3627;&#3617;&#3634;&#3618;&#3648;&#3627;&#3605;&#3640;</label>
+    <textarea id="noteInput" placeholder="&#3585;&#3619;&#3629;&#3585;&#3634;&#3621;&#3632;&#3648;&#3629;&#3637;&#3618;&#3604;&#3656;&#3617;&#3648;&#3617; (&#3606;&#3657;&#3634;&#3617;&#3637;)"></textarea>
   </div>
-
   <div class="btn-row">
-    <button class="btn-send" onclick="sendData()">ส่งข้อมูล</button>
+    <button class="btn-send" onclick="sendData()">&#3626;&#3656;&#3591;&#3586;&#3657;&#3629;&#3617;&#3641;&#3621;</button>
   </div>
 </div>
 
 <script>
-  const items = [
+  var items = [
     'Salmon', 'Maguro', 'Madai', 'ShimaAji', 'Kanpachi',
     'Aori Ika', 'Hokkigai', 'Ikura', 'Hotate'
   ];
 
-  // แಪดงวั�นที่ภาษาไทย  function getThaiDate() {
-    const now = new Date();
-    const days = ['อาทิตฮ์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
-    const months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-    const day = days[now.getDay()];
-    const date = now.getDate();
-    const month = months[now.getMonth()];
-    const year = now.getFullYear() + 543;
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
-    const ss = String(now.getSeconds()).padStart(2, '0');
-    return `wan${day}ที่ ${date} ${month} ${year}  ${hh}:${mm}:${ss}`;
+  function getThaiDate() {
+    var now = new Date();
+    var days = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+    var months = ['มกราคม','กุกภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุษาคม','พฤศจิกายน','ธันวาคม'];
+    var day = days[now.getDay()];
+    var date = now.getDate();
+    var month = months[now.getMonth()];
+    var year = now.getFullYear() + 543;
+    var hh = String(now.getHours()).padStart(2,'0');
+    var mm = String(now.getMinutes()).padStart(2,'0');
+    var ss = String(now.getSeconds()).padStart(2,'0');
+    return 'wan' + day + 'ที่ ' + date + ' ' + month + ' ' + year + '  ' + hh + ':' + mm + ':' + ss;
   }
   document.getElementById('dateDisplay').textContent = getThaiDate();
-  setInterval(() => {
+  setInterval(function() {
     document.getElementById('dateDisplay').textContent = getThaiDate();
   }, 1000);
 
-  // สร้างแถวตาราง
-  const tbody = document.getElementById('stockBody');
-  items.forEach((item, i) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${item}</td>
-      <td><input type="number" id="old_${i}" value="0" min="0"></td>
-      <td><input type="number" id="in_${i}" value="0" min="0"></td>
-      <td><input type="number" id="cut_${i}" value="0" min="0"></td>
-      <td><input type="number" id="rem_${i}" value="0" min="0" style="background:#d8f3dc; font-weight:700; color:#1b4332;"></td>
-    `;
+  var tbody = document.getElementById('stockBody');
+  items.forEach(function(item, i) {
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>' + item + '</td>' +
+      '<td><input type="number" id="old_' + i + '" value="0" min="0"></td>' +
+      '<td><input type="number" id="in_' + i + '" value="0" min="0"></td>' +
+      '<td><input type="number" id="cut_' + i + '" value="0" min="0"></td>' +
+      '<td><input type="number" id="rem_' + i + '" value="0" min="0" style="background:#d8f3dc;font-weight:700;color:#1b4332;"></td>';
     tbody.appendChild(tr);
   });
 
-  // ส่งข้อมูล
-  const SHEET_URL = 'https://script.google.com/macros/res/AKfycby0tNfxuwJVdq7j9WMXvdBbSXWsu4md7tyBHSkceykHg1xbenltdwTE265lO3jui7A6Xg/exec';
+  var SHEET_URL = 'https://script.google.com/macros/s/AKfycby0tNfxuwJVdq7j9WMXvdBbSXWsu4md7tyBHSkceykHg1xbenltdwTE265lO3jui7A6Xg/exec';
 
-  async function sendData() {
-    const rows = items.map((item, i) => ({
-      item,
-      old: document.getElementById(`old_${i}`).value,
-      in: document.getElementById(`in_${i}`).value,
-      cut: document.getElementById(`cut_${i}`).value,
-      rem: document.getElementById(`rem_${i}`).value,
-    }));
-    const note = document.getElementById('noteInput').value;
-    const date = document.getElementById('dateDisplay').textContent;
-
-    const btn = document.querySelector('.btn-send');
+  function sendData() {
+    var rows = items.map(function(item, i) {
+      return {
+        item: item,
+        old: document.getElementById('old_' + i).value,
+        in: document.getElementById('in_' + i).value,
+        cut: document.getElementById('cut_' + i).value,
+        rem: document.getElementById('rem_' + i).value
+      };
+    });
+    var note = document.getElementById('noteInput').value;
+    var date = document.getElementById('dateDisplay').textContent;
+    var btn = document.querySelector('.btn-send');
     btn.disabled = true;
     btn.textContent = 'ชาลิเหง...';
 
-    // ตทวฒ screenshot ของโทนูล
-    let imageBase64 = null;
-    try {
-      const canvas = await html2canvas(document.getElementById('captureArea'), {
-        scale: 1.5,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false
+    html2canvas(document.getElementById('captureArea'), {
+      scale: 1.5,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false
+    }).then(function(canvas) {
+      var imageBase64 = canvas.toDateURL�image/jpeg', 0.85).split(',')[1];
+      fetch(SHEET_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: date, rows: rows, note: note, imageBase64: imageBase64 })
+      }).then(function() {
+        alert('ส่งข้อมูลก้อเรฎส่ม! ✅\nบันนุฅ Google Drive แล');
+        btn.disabled = false;
+        btn.textContent = 'ส่งข้อมูล';
+      }).catch(function(err) {
+        alert('เทจ่นั: ມ\n' + err.message);
+        btn.disabled = false;
+        btn.textContent = 'ส่งข้อมูล';
       });
-      imageBase64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
-    } catch(e) {
-      console.warn('Screenshot failed:', e);
-    }
-
-    fetch(SHEET_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date, rows, note, imageBase64 })
-    })
-    .then(() => {
-      alert('ส่งข้อมูลก้อเรฎส่ม! ✅\nบันนุฅ Google Drive แล');
-      btn.disabled = false;
-      btn.textContent = 'ส่งข้อมูล';
-    })
-    .catch(err => {
-      alert('เทจ่นั: ມ\n' + err.message);
-      btn.disabled = false;
-      btn.textContent = 'ส่งข้อมูล';
+    }).catch(function(err) {
+      fetch(SHEET_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: date, rows: rows, note: note })
+      }).then(function() {
+        alert('ส่งข้อมูล เรฎ! ✅');
+        btn.disabled = false;
+        btn.textContent = 'ส่งข้อมูล';
+      });
     });
   }
 </script>
