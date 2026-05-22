@@ -209,7 +209,7 @@
   });
 
   // ส่งข้อมูล
-  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbztH-6_xzmIoUL9cIarYURhmk7svO5XufJ4olrka0lqUekCPJUmhMLbcSbHaJsvPopQwA/exec';
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycby0tNfxuwJVdq7j9WMXvdBbSXWsu4md7tyBHSkceykHg1xbenltdwTE265lO3jui7A6Xg/exec';
 
   function sendData() {
     const rows = items.map((item, i) => ({
@@ -224,7 +224,7 @@
 
     const btn = document.querySelector('.btn-send');
     btn.disabled = true;
-    btn.textContent = 'กรละส่ง...';
+    btn.textContent = 'ชาลิเหง...';
 
     fetch(SHEET_URL, {
       method: 'POST',
@@ -233,16 +233,17 @@
       body: JSON.stringify({ date, rows, note })
     })
     .then(() => {
-      alert('ส่งข้อมูต่นทร์! b\nมิดเรียบร้อยแล้วรลฯ Google Sheet แร์รับเงินร์');
+      alert('ส่งข้อมูล เรฎส่ม! ✅]นับนุฅ Google Sheet แล;
+
       btn.disabled = false;
       btn.textContent = 'ส่งข้อมูล';
     })
     .catch(err => {
-      alert('เขทรนะรุจ \n' + err.message);
+      alert('เทจ่นั: ມ\n' + err.message);
       btn.disabled = false;
       btn.textContent = 'ส่งข้อมูล';
     });
   }
-</pcript>
+</script>
 </body>
 </html>
