@@ -161,17 +161,45 @@
     document.getElementById('dateDisplay').textContent = getThaiDate();
   }, 1000);
 
+  function hotateCell(prefix, isRem) {
+    var wrapStyle = isRem ? ' style="background:#d8f3dc;padding:4px 2px;"' : '';
+    var iStyle = 'width:42px;padding:4px 3px;border:1px solid #ccc;border-radius:6px;text-align:center;font-size:0.85rem;background:transparent;';
+    return '<td><div style="display:flex;align-items:center;gap:3px;justify-content:center;"' + wrapStyle + '>' +
+      '<input type="number" id="' + prefix + '_box" value="0" min="0" style="' + iStyle + '">' +
+      '<span style="font-size:0.8rem;color:#555;">\u0E01\u0E25\u0E48\u0E2D\u0E07</span>' +
+      '<input type="number" id="' + prefix + '_pc" value="0" min="0" style="' + iStyle + '">' +
+      '<span style="font-size:0.8rem;color:#555;">\u0E15\u0E31\u0E27</span>' +
+      '</div></td>';
+  }
+
   var tbody = document.getElementById('stockBody');
   items.forEach(function(item, i) {
     var tr = document.createElement('tr');
-    tr.innerHTML =
-      '<td>' + item + '</td>' +
-      '<td><input type="number" id="old_' + i + '" value="0" min="0"></td>' +
-      '<td><input type="number" id="in_' + i + '" value="0" min="0"></td>' +
-      '<td><input type="number" id="cut_' + i + '" value="0" min="0"></td>' +
-      '<td><input type="number" id="rem_' + i + '" value="0" min="0" style="background:#d8f3dc;font-weight:700;color:#1b4332;"></td>';
+    if (item === 'Hotate') {
+      tr.innerHTML =
+        '<td>' + item + '</td>' +
+        hotateCell('old_' + i, false) +
+        hotateCell('in_' + i, false) +
+        hotateCell('cut_' + i, false) +
+        hotateCell('rem_' + i, true);
+    } else {
+      tr.innerHTML =
+        '<td>' + item + '</td>' +
+        '<td><input type="number" id="old_' + i + '" value="0" min="0"></td>' +
+        '<td><input type="number" id="in_' + i + '" value="0" min="0"></td>' +
+        '<td><input type="number" id="cut_' + i + '" value="0" min="0"></td>' +
+        '<td><input type="number" id="rem_' + i + '" value="0" min="0" style="background:#d8f3dc;font-weight:700;color:#1b4332;"></td>';
+    }
     tbody.appendChild(tr);
   });
+
+  function getVal(prefix) {
+    var box = document.getElementById(prefix + '_box');
+    var pc  = document.getElementById(prefix + '_pc');
+    if (box && pc) return box.value + '\u0E01\u0E25\u0E48\u0E2D\u0E07 ' + pc.value + '\u0E15\u0E31\u0E27';
+    var el = document.getElementById(prefix);
+    return el ? el.value : '0';
+  }
 
   var SHEET_URL = 'https://script.google.com/macros/s/AKfycby0tNfxuwJVdq7j9WMXvdBbSXWsu4md7tyBHSkceykHg1xbenltdwTE265lO3jui7A6Xg/exec';
 
@@ -179,10 +207,10 @@
     var rows = items.map(function(item, i) {
       return {
         item: item,
-        old: document.getElementById('old_' + i).value,
-        in: document.getElementById('in_' + i).value,
-        cut: document.getElementById('cut_' + i).value,
-        rem: document.getElementById('rem_' + i).value
+        old: getVal('old_' + i),
+        in:  getVal('in_' + i),
+        cut: getVal('cut_' + i),
+        rem: getVal('rem_' + i)
       };
     });
     var note = document.getElementById('noteInput').value;
@@ -208,7 +236,7 @@
         btn.disabled = false;
         btn.textContent = '\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25';
       }).catch(function(err) {
-        alert('\u0E40\u0E01\u0E34\u0E14\u0E02\u0E49\u0E2D\u0E1C\u0E34\u0E14\u0E1E\u0E25\u0E32\u0E14 \u274C\n' + err.message);
+        alert('\u0E40\u0E01\u0E34\u0E14\u0E02\u0E49\u0E2D\u0E1C\u0E34\u0E14\u0E1F\u0E25\u0E32\u0E14 \u274C\n' + err.message);
         btn.disabled = false;
         btn.textContent = '\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25';
       });
