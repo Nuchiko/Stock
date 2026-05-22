@@ -145,8 +145,8 @@
 
   function getThaiDate() {
     var now = new Date();
-    var days = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
-    var months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+    var days = ['\u0E2D\u0E32\u0E17\u0E34\u0E15\u0E22\u0E4C','\u0E08\u0E31\u0E19\u0E17\u0E23\u0E4C','\u0E2D\u0E31\u0E07\u0E04\u0E32\u0E23','\u0E1E\u0E38\u0E18','\u0E1E\u0E24\u0E2B\u0E31\u0E2A\u0E1A\u0E14\u0E35','\u0E28\u0E38\u0E01\u0E23\u0E4C','\u0E40\u0E2A\u0E32\u0E23\u0E4C'];
+    var months = ['\u0E21\u0E01\u0E23\u0E32\u0E04\u0E21','\u0E01\u0E38\u0E21\u0E20\u0E32\u0E1E\u0E31\u0E19\u0E18\u0E4C','\u0E21\u0E35\u0E19\u0E32\u0E04\u0E21','\u0E40\u0E21\u0E29\u0E32\u0E22\u0E19','\u0E1E\u0E24\u0E29\u0E20\u0E32\u0E04\u0E21','\u0E21\u0E34\u0E16\u0E38\u0E19\u0E32\u0E22\u0E19','\u0E01\u0E23\u0E01\u0E0E\u0E32\u0E04\u0E21','\u0E2A\u0E34\u0E07\u0E2B\u0E32\u0E04\u0E21','\u0E01\u0E31\u0E19\u0E22\u0E32\u0E22\u0E19','\u0E15\u0E38\u0E25\u0E32\u0E04\u0E21','\u0E1E\u0E24\u0E28\u0E08\u0E34\u0E01\u0E32\u0E22\u0E19','\u0E18\u0E31\u0E19\u0E27\u0E32\u0E04\u0E21'];
     var day = days[now.getDay()];
     var date = now.getDate();
     var month = months[now.getMonth()];
@@ -154,7 +154,7 @@
     var hh = String(now.getHours()).padStart(2,'0');
     var mm = String(now.getMinutes()).padStart(2,'0');
     var ss = String(now.getSeconds()).padStart(2,'0');
-    return 'วัน' + day + 'ที่ ' + date + ' ' + month + ' ' + year + '  ' + hh + ':' + mm + ':' + ss;
+    return '\u0E27\u0E31\u0E19' + day + '\u0E17\u0E35\u0E48 ' + date + ' ' + month + ' ' + year + '  ' + hh + ':' + mm + ':' + ss;
   }
   document.getElementById('dateDisplay').textContent = getThaiDate();
   setInterval(function() {
@@ -189,7 +189,7 @@
     var date = document.getElementById('dateDisplay').textContent;
     var btn = document.querySelector('.btn-send');
     btn.disabled = true;
-    btn.textContent = 'กำลังส่ง...';
+    btn.textContent = '\u0E01\u0E33\u0E25\u0E31\u0E07\u0E2A\u0E48\u0E07...';
 
     html2canvas(document.getElementById('captureArea'), {
       scale: 1.5,
@@ -204,13 +204,13 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ date: date, rows: rows, note: note, imageBase64: imageBase64 })
       }).then(function() {
-        alert('ส่งข้อมูลเรียบร้อยแล้ว! ✅\nบันทึกลง Google Drive แล้ว');
+        alert('\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E40\u0E23\u0E35\u0E22\u0E1A\u0E23\u0E49\u0E2D\u0E22\u0E41\u0E25\u0E49\u0E27! \u2705\n\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E25\u0E07 Google Drive \u0E41\u0E25\u0E49\u0E27');
         btn.disabled = false;
-        btn.textContent = 'ส่งข้อมูล';
+        btn.textContent = '\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25';
       }).catch(function(err) {
-        alert('เกิดข้อผิดพลาด ❌\n' + err.message);
+        alert('\u0E40\u0E01\u0E34\u0E14\u0E02\u0E49\u0E2D\u0E1C\u0E34\u0E14\u0E1E\u0E25\u0E32\u0E14 \u274C\n' + err.message);
         btn.disabled = false;
-        btn.textContent = 'ส่งข้อมูล';
+        btn.textContent = '\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25';
       });
     }).catch(function(err) {
       fetch(SHEET_URL, {
@@ -219,9 +219,9 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ date: date, rows: rows, note: note })
       }).then(function() {
-        alert('ส่งข้อมูลเรียบร้อย! ✅');
+        alert('\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E40\u0E23\u0E35\u0E22\u0E1A\u0E23\u0E49\u0E2D\u0E22! \u2705');
         btn.disabled = false;
-        btn.textContent = 'ส่งข้อมูล';
+        btn.textContent = '\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25';
       });
     });
   }
