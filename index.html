@@ -194,21 +194,13 @@
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${item}</td>
-      <td><input type="number" id="old_${i}" value="0" min="0" oninput="calc(${i})"></td>
-      <td><input type="number" id="in_${i}" value="0" min="0" oninput="calc(${i})"></td>
-      <td><input type="number" id="cut_${i}" value="0" min="0" oninput="calc(${i})"></td>
-      <td><span class="result" id="rem_${i}">0</span></td>
+      <td><input type="number" id="old_${i}" value="0" min="0"></td>
+      <td><input type="number" id="in_${i}" value="0" min="0"></td>
+      <td><input type="number" id="cut_${i}" value="0" min="0"></td>
+      <td><input type="number" id="rem_${i}" value="0" min="0" style="background:#d8f3dc; font-weight:700; color:#1b4332;"></td>
     `;
     tbody.appendChild(tr);
   });
-
-  // คำนวณเหลือ
-  function calc(i) {
-    const old = parseFloat(document.getElementById(`old_${i}`).value) || 0;
-    const inVal = parseFloat(document.getElementById(`in_${i}`).value) || 0;
-    const cut = parseFloat(document.getElementById(`cut_${i}`).value) || 0;
-    document.getElementById(`rem_${i}`).textContent = old + inVal - cut;
-  }
 
   // ส่งข้อมูล
   function sendData() {
@@ -217,7 +209,7 @@
       old: document.getElementById(`old_${i}`).value,
       in: document.getElementById(`in_${i}`).value,
       cut: document.getElementById(`cut_${i}`).value,
-      rem: document.getElementById(`rem_${i}`).textContent,
+      rem: document.getElementById(`rem_${i}`).value,
     }));
     const note = document.getElementById('noteInput').value;
     console.log('Stock Data:', rows, 'Note:', note);
