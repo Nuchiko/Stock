@@ -184,9 +184,15 @@
     const date = now.getDate();
     const month = months[now.getMonth()];
     const year = now.getFullYear() + 543;
-    return `วัน${day}ที่ ${date} ${month} ${year}`;
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    const ss = String(now.getSeconds()).padStart(2, '0');
+    return `วัน${day}ที่ ${date} ${month} ${year}  ${hh}:${mm}:${ss}`;
   }
   document.getElementById('dateDisplay').textContent = getThaiDate();
+  setInterval(() => {
+    document.getElementById('dateDisplay').textContent = getThaiDate();
+  }, 1000);
 
   // สร้างแถวตาราง
   const tbody = document.getElementById('stockBody');
