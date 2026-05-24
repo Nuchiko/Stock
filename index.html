@@ -1,119 +1,148 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stock Daily</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-      background: #f0f4f0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      padding: 24px 16px;
-    }
-    .container {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 860px;
-      overflow: hidden;
-    }
-    .header {
-      background: #2d6a4f;
-      color: #fff;
-      text-align: center;
-      padding: 20px 16px 14px;
-    }
-    .header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: 1px; }
-    .header .date { font-size: 0.95rem; margin-top: 4px; opacity: 0.85; }
-    table { width: 100%; border-collapse: collapse; }
-    thead th {
-      background: #40916c;
-      color: #fff;
-      padding: 10px 8px;
-      font-size: 0.9rem;
-      text-align: center;
-    }
-    thead th:first-child { text-align: left; padding-left: 16px; }
-    tbody tr:nth-child(even) { background: #f6faf7; }
-    tbody tr:hover { background: #e8f5e9; }
-    tbody td {
-      padding: 8px;
-      text-align: center;
-      font-size: 0.95rem;
-      border-bottom: 1px solid #e0e0e0;
-    }
-    tbody td:first-child {
-      text-align: left;
-      padding-left: 16px;
-      font-weight: 600;
-      color: #1b4332;
-    }
-    tbody td input[type="number"] {
-      width: 70px;
-      padding: 5px 6px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      text-align: center;
-      font-size: 0.9rem;
-      color: #333;
-    }
-    tbody td input[type="number"]:focus {
-      outline: none;
-      border-color: #40916c;
-      box-shadow: 0 0 0 2px rgba(64,145,108,0.2);
-    }
-    .used-cell {
-      background: #fff3e0;
-      font-weight: 700;
-      color: #e65100;
-    }
-    .note-section { padding: 16px; border-top: 2px solid #e0e0e0; }
-    .note-section label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 700;
-      color: #2d6a4f;
-      margin-bottom: 8px;
-      font-size: 0.95rem;
-    }
-    .note-section textarea {
-      width: 100%;
-      height: 80px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 10px;
-      font-size: 0.9rem;
-      font-family: inherit;
-      resize: vertical;
-      color: #333;
-    }
-    .note-section textarea:focus {
-      outline: none;
-      border-color: #40916c;
-      box-shadow: 0 0 0 2px rgba(64,145,108,0.2);
-    }
-    .btn-row { padding: 14px 16px; display: flex; justify-content: flex-end; }
-    .btn-send {
-      background: #2d6a4f;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 28px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn-send:hover { background: #1b4332; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stock Daily</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: #f0f4f0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 24px 16px;
+}
+.container {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 860px;
+  overflow: hidden;
+}
+.header {
+  background: #2d6a4f;
+  color: #fff;
+  text-align: center;
+  padding: 20px 16px 14px;
+}
+.header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: 1px; }
+.header .date { font-size: 0.95rem; margin-top: 4px; opacity: 0.85; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; min-width: 520px; }
+thead th {
+  background: #40916c; color: #fff;
+  padding: 10px 8px; font-size: 0.9rem; text-align: center;
+}
+thead th:first-child { text-align: left; padding-left: 16px; }
+tbody tr:nth-child(even) { background: #f6faf7; }
+tbody tr:hover { background: #e8f5e9; }
+tbody td {
+  padding: 8px; text-align: center;
+  font-size: 0.95rem; border-bottom: 1px solid #e0e0e0;
+}
+tbody td:first-child { text-align: left; padding-left: 16px; font-weight: 600; color: #1b4332; }
+tbody td input[type="number"] {
+  width: 70px; padding: 5px 6px;
+  border: 1px solid #ccc; border-radius: 6px;
+  text-align: center; font-size: 0.9rem; color: #333;
+}
+tbody td input[type="number"]:focus {
+  outline: none; border-color: #40916c;
+  box-shadow: 0 0 0 2px rgba(64,145,108,0.2);
+}
+.used-cell { background: #fff3e0; font-weight: 700; color: #e65100; }
+.hotate-wrap { display: flex; align-items: center; gap: 3px; justify-content: center; }
+.hotate-row { display: flex; align-items: center; gap: 2px; }
+.hotate-unit { font-size: 0.8rem; color: #555; }
+@media (max-width: 599px) {
+  body { padding: 0; background: #f0f4f0; }
+  .container { border-radius: 0; box-shadow: none; }
+  .header h1 { font-size: 1.25rem; }
+  .header .date { font-size: 0.82rem; }
+  .table-wrap { overflow-x: visible; }
+  table { display: block; min-width: 0; }
+  thead { display: none; }
+  tbody {
+    display: flex; flex-direction: column; gap: 10px;
+    padding: 12px; background: #f0f4f0;
+  }
+  tbody tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.09);
+    overflow: hidden;
+    border: 1px solid #d8ede1;
+  }
+  tbody tr:nth-child(even) { background: #fff; }
+  tbody tr:hover { background: #fff; }
+  tbody td:first-child {
+    grid-column: 1 / -1;
+    background: #2d6a4f; color: #fff;
+    text-align: left; padding: 10px 14px;
+    font-size: 1rem; font-weight: 700; border-bottom: none;
+  }
+  tbody td:not(:first-child):not(:last-child) {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 10px 6px 12px; gap: 6px;
+    border-bottom: 1px solid #e8f5e9;
+    border-right: 1px solid #e8f5e9;
+  }
+  tbody td:not(:first-child):not(:last-child)::before {
+    content: attr(data-label);
+    font-size: 0.7rem; font-weight: 700;
+    color: #40916c; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  tbody td:last-child {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px; padding: 9px 14px;
+    background: #fff8f0; border-top: 2px solid #ffe0b2;
+    font-size: 0.95rem; font-weight: 700; color: #e65100;
+  }
+  tbody td:last-child::before {
+    content: 'ใช้ไป: ';
+    color: #c25c00; font-size: 0.85rem; font-weight: 600;
+  }
+  tbody td input[type="number"] { width: 80px; padding: 8px 6px; font-size: 1rem; }
+  .hotate-wrap { flex-direction: column; gap: 4px; }
+  .hotate-row input { width: 60px !important; }
+  .note-section { margin: 0 12px; border-radius: 10px; border: 1px solid #ddd; }
+  .btn-row { padding: 12px; }
+  .btn-send { width: 100%; padding: 14px; font-size: 1.05rem; border-radius: 10px; }
+}
+.note-section { padding: 16px; border-top: 2px solid #e0e0e0; }
+.note-section label {
+  display: flex; align-items: center; gap: 6px;
+  font-weight: 700; color: #2d6a4f;
+  margin-bottom: 8px; font-size: 0.95rem;
+}
+.note-section textarea {
+  width: 100%; height: 80px;
+  border: 1px solid #ccc; border-radius: 8px;
+  padding: 10px; font-size: 0.9rem;
+  font-family: inherit; resize: vertical; color: #333;
+}
+.note-section textarea:focus {
+  outline: none; border-color: #40916c;
+  box-shadow: 0 0 0 2px rgba(64,145,108,0.2);
+}
+.btn-row { padding: 14px 16px; display: flex; justify-content: flex-end; }
+.btn-send {
+  background: #2d6a4f; color: #fff;
+  border: none; border-radius: 8px;
+  padding: 12px 32px; font-size: 1rem;
+  font-weight: 600; cursor: pointer; transition: background 0.2s;
+}
+.btn-send:hover { background: #1b4332; }
+</style>
 </head>
 <body>
 <div class="container" id="captureArea">
@@ -121,19 +150,21 @@
     <h1>&#128203; Stock Daily</h1>
     <div class="date" id="dateDisplay"></div>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th>&#3619;&#3634;&#3618;&#3585;&#3634;&#3619;</th>
-        <th>&#3586;&#3629;&#3591;&#3648;&#3604;&#3636;&#3617;</th>
-        <th>&#3586;&#3629;&#3591;&#3648;&#3586;&#3657;&#3634;</th>
-        <th>&#3605;&#3633;&#3604;&#3649;&#3605;&#3656;&#3591;</th>
-        <th>&#3648;&#3627;&#3621;&#3639;&#3629;</th>
-        <th>&#3651;&#3594;&#3657;&#3652;&#3611;</th>
-      </tr>
-    </thead>
-    <tbody id="stockBody"></tbody>
-  </table>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>&#3619;&#3634;&#3618;&#3585;&#3634;&#3619;</th>
+          <th>&#3586;&#3629;&#3591;&#3648;&#3604;&#3636;&#3617;</th>
+          <th>&#3586;&#3629;&#3591;&#3648;&#3586;&#3657;&#3634;</th>
+          <th>&#3605;&#3633;&#3604;&#3649;&#3605;&#3656;&#3591;</th>
+          <th>&#3648;&#3627;&#3621;&#3639;&#3629;</th>
+          <th>&#3651;&#3594;&#3657;&#3652;&#3611;</th>
+        </tr>
+      </thead>
+      <tbody id="stockBody"></tbody>
+    </table>
+  </div>
   <div class="note-section">
     <label>&#128221; &#3627;&#3617;&#3634;&#3618;&#3648;&#3627;&#3605;&#3640;</label>
     <textarea id="noteInput" placeholder="&#3585;&#3619;&#3629;&#3585;&#3619;&#3634;&#3618;&#3621;&#3632;&#3648;&#3629;&#3637;&#3618;&#3604;&#3648;&#3614;&#3636;&#3656;&#3617;&#3648;&#3605;&#3636;&#3617; (&#3606;&#3657;&#3634;&#3617;&#3637;)"></textarea>
@@ -142,148 +173,68 @@
     <button class="btn-send" onclick="sendData()">&#3626;&#3656;&#3591;&#3586;&#3657;&#3629;&#3617;&#3641;&#3621;</button>
   </div>
 </div>
-
 <script>
-  var items = [
-    'Salmon', 'Maguro', 'Madai', 'ShimaAji', 'Kanpachi',
-    'Aori Ika', 'Hokkigai', 'Ikura', 'Hotate'
-  ];
-
-  function getThaiDate() {
-    var now = new Date();
-    var days = ['\u0E2D\u0E32\u0E17\u0E34\u0E15\u0E22\u0E4C','\u0E08\u0E31\u0E19\u0E17\u0E23\u0E4C','\u0E2D\u0E31\u0E07\u0E04\u0E32\u0E23','\u0E1E\u0E38\u0E18','\u0E1E\u0E24\u0E2B\u0E31\u0E2A\u0E1B\u0E14\u0E35','\u0E28\u0E38\u0E01\u0E23\u0E4C','\u0E40\u0E2A\u0E32\u0E23\u0E4C'];
-    var months = ['\u0E21\u0E01\u0E23\u0E32\u0E04\u0E21','\u0E01\u0E38\u0E21\u0E20\u0E32\u0E1E\u0E31\u0E19\u0E18\u0E4C','\u0E21\u0E35\u0E19\u0E32\u0E04\u0E21','\u0E40\u0E21\u0E29\u0E32\u0E22\u0E19','\u0E1E\u0E24\u0E29\u0E20\u0E32\u0E04\u0E21','\u0E21\u0E34\u0E16\u0E38\u0E19\u0E32\u0E22\u0E19','\u0E01\u0E23\u0E01\u0E0E\u0E32\u0E04\u0E21','\u0E2A\u0E34\u0E07\u0E2B\u0E32\u0E04\u0E21','\u0E01\u0E31\u0E19\u0E22\u0E32\u0E22\u0E19','\u0E15\u0E38\u0E25\u0E32\u0E04\u0E21','\u0E1E\u0E24\u0E28\u0E08\u0E34\u0E01\u0E32\u0E22\u0E19','\u0E18\u0E31\u0E19\u0E27\u0E32\u0E04\u0E21'];
-    var day = days[now.getDay()];
-    var date = now.getDate();
-    var month = months[now.getMonth()];
-    var year = now.getFullYear() + 543;
-    var hh = String(now.getHours()).padStart(2,'0');
-    var mm = String(now.getMinutes()).padStart(2,'0');
-    var ss = String(now.getSeconds()).padStart(2,'0');
-    return '\u0E27\u0E31\u0E19' + day + '\u0E17\u0E35\u0E48 ' + date + ' ' + month + ' ' + year + '  ' + hh + ':' + mm + ':' + ss;
+var items = ['Salmon','Maguro','Madai','ShimaAji','Kanpachi','Aori Ika','Hokkigai','Ikura','Hotate'];
+function getThaiDate() {
+  var now = new Date();
+  var days = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสปดี','ศุกร์','เสาร์'];
+  var months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  var hh = String(now.getHours()).padStart(2,'0');
+  var mm = String(now.getMinutes()).padStart(2,'0');
+  var ss = String(now.getSeconds()).padStart(2,'0');
+  return 'วัน' + days[now.getDay()] + 'ที่ ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + (now.getFullYear()+543) + ' ' + hh + ':' + mm + ':' + ss;
+}
+document.getElementById('dateDisplay').textContent = getThaiDate();
+setInterval(function(){ document.getElementById('dateDisplay').textContent = getThaiDate(); }, 1000);
+function calcUsed(i, isHotate) {
+  var cell = document.getElementById('used_' + i);
+  if (!cell) return;
+  if (isHotate) {
+    var ob=parseInt(document.getElementById('old_'+i+'_box').value)||0, op=parseInt(document.getElementById('old_'+i+'_pc').value)||0;
+    var ib=parseInt(document.getElementById('in_'+i+'_box').value)||0, ip=parseInt(document.getElementById('in_'+i+'_pc').value)||0;
+    var rb=parseInt(document.getElementById('rem_'+i+'_box').value)||0, rp=parseInt(document.getElementById('rem_'+i+'_pc').value)||0;
+    cell.textContent = (ob+ib-rb)+'กล่อง '+(op+ip-rp)+'ตัว';
+  } else {
+    var o=parseInt(document.getElementById('old_'+i).value)||0, n=parseInt(document.getElementById('in_'+i).value)||0;
+    var c=parseInt(document.getElementById('cut_'+i).value)||0, r=parseInt(document.getElementById('rem_'+i).value)||0;
+    cell.textContent = o+n-c-r;
   }
-  document.getElementById('dateDisplay').textContent = getThaiDate();
-  setInterval(function() {
-    document.getElementById('dateDisplay').textContent = getThaiDate();
-  }, 1000);
-
-  function calcUsed(i, isHotate) {
-    var cell = document.getElementById('used_' + i);
-    if (!cell) return;
-    if (isHotate) {
-      var ob = parseInt(document.getElementById('old_' + i + '_box').value) || 0;
-      var op = parseInt(document.getElementById('old_' + i + '_pc').value) || 0;
-      var ib = parseInt(document.getElementById('in_' + i + '_box').value) || 0;
-      var ip = parseInt(document.getElementById('in_' + i + '_pc').value) || 0;
-      var rb = parseInt(document.getElementById('rem_' + i + '_box').value) || 0;
-      var rp = parseInt(document.getElementById('rem_' + i + '_pc').value) || 0;
-      cell.textContent = (ob+ib-rb) + '\u0E01\u0E25\u0E48\u0E2D\u0E07 ' + (op+ip-rp) + '\u0E15\u0E31\u0E27';
-    } else {
-      var o = parseInt(document.getElementById('old_' + i).value) || 0;
-      var n = parseInt(document.getElementById('in_' + i).value) || 0;
-      var c = parseInt(document.getElementById('cut_' + i).value) || 0;
-      var r = parseInt(document.getElementById('rem_' + i).value) || 0;
-      cell.textContent = o + n - c - r;
-    }
+}
+function hotateCell(prefix, label, isRem, idx) {
+  var iStyle='width:42px;padding:4px 3px;border:1px solid #ccc;border-radius:6px;text-align:center;font-size:0.85rem;background:transparent;';
+  var onInput=idx!==undefined?' oninput="calcUsed('+idx+',true)"':'';
+  var tdStyle=isRem?' style="background:#d8f3dc"':'';
+  return '<td data-label="'+label+'"'+tdStyle+'><div class="hotate-wrap"><div class="hotate-row"><input type="number" id="'+prefix+'_box" value="0" min="0"'+onInput+' style="'+iStyle+'"><span class="hotate-unit">กล่อง</span></div><div class="hotate-row"><input type="number" id="'+prefix+'_pc" value="0" min="0"'+onInput+' style="'+iStyle+'"><span class="hotate-unit">ตัว</span></div></div></td>';
+}
+var tbody = document.getElementById('stockBody');
+items.forEach(function(item,i){
+  var tr = document.createElement('tr');
+  if (item==='Hotate') {
+    tr.innerHTML='<td>'+item+'</td>'+hotateCell('old_'+i,'ของเดิม',false,i)+hotateCell('in_'+i,'ของเข้า',false,i)+'<td data-label="ตัดแต่ง"></td>'+hotateCell('rem_'+i,'เหลือ',true,i)+'<td id="used_'+i+'" class="used-cell" style="font-size:0.85rem;">0กล่อง 0ตัว</td>';
+  } else {
+    tr.innerHTML='<td>'+item+'</td>'+'<td data-label="ของเดิม"><input type="number" id="old_'+i+'" value="0" min="0" oninput="calcUsed('+i+',false)"></td>'+'<td data-label="ของเข้า"><input type="number" id="in_'+i+'" value="0" min="0" oninput="calcUsed('+i+',false)"></td>'+'<td data-label="ตัดแต่ง"><input type="number" id="cut_'+i+'" value="0" min="0" oninput="calcUsed('+i+',false)"></td>'+'<td data-label="เหลือ"><input type="number" id="rem_'+i+'" value="0" min="0" oninput="calcUsed('+i+',false)" style="background:#d8f3dc;font-weight:700;color:#1b4332;"></td>'+'<td id="used_'+i+'" class="used-cell">0</td>';
   }
-
-  function hotateCell(prefix, isRem, idx) {
-    var wrapStyle = isRem ? ' style="background:#d8f3dc;padding:4px 2px;"' : '';
-    var iStyle = 'width:42px;padding:4px 3px;border:1px solid #ccc;border-radius:6px;text-align:center;font-size:0.85rem;background:transparent;';
-    var onInput = (idx !== undefined) ? ' oninput="calcUsed(' + idx + ',true)"' : '';
-    return '<td><div style="display:flex;align-items:center;gap:3px;justify-content:center;"' + wrapStyle + '>' +
-      '<input type="number" id="' + prefix + '_box" value="0" min="0"' + onInput + ' style="' + iStyle + '">' +
-      '<span style="font-size:0.8rem;color:#555;">\u0E01\u0E25\u0E48\u0E2D\u0E07</span>' +
-      '<input type="number" id="' + prefix + '_pc" value="0" min="0"' + onInput + ' style="' + iStyle + '">' +
-      '<span style="font-size:0.8rem;color:#555;">\u0E15\u0E31\u0E27</span>' +
-      '</div></td>';
-  }
-
-  var tbody = document.getElementById('stockBody');
-  items.forEach(function(item, i) {
-    var tr = document.createElement('tr');
-    if (item === 'Hotate') {
-      tr.innerHTML =
-        '<td>' + item + '</td>' +
-        hotateCell('old_' + i, false, i) +
-        hotateCell('in_' + i, false, i) +
-        '<td></td>' +
-        hotateCell('rem_' + i, true, i) +
-        '<td id="used_' + i + '" class="used-cell" style="font-size:0.85rem;">0\u0E01\u0E25\u0E48\u0E2D\u0E07 0\u0E15\u0E31\u0E27</td>';
-    } else {
-      tr.innerHTML =
-        '<td>' + item + '</td>' +
-        '<td><input type="number" id="old_' + i + '" value="0" min="0" oninput="calcUsed(' + i + ',false)"></td>' +
-        '<td><input type="number" id="in_' + i + '" value="0" min="0" oninput="calcUsed(' + i + ',false)"></td>' +
-        '<td><input type="number" id="cut_' + i + '" value="0" min="0" oninput="calcUsed(' + i + ',false)"></td>' +
-        '<td><input type="number" id="rem_' + i + '" value="0" min="0" oninput="calcUsed(' + i + ',false)" style="background:#d8f3dc;font-weight:700;color:#1b4332;"></td>' +
-        '<td id="used_' + i + '" class="used-cell">0</td>';
-    }
-    tbody.appendChild(tr);
-  });
-
-  function getVal(prefix) {
-    var box = document.getElementById(prefix + '_box');
-    var pc  = document.getElementById(prefix + '_pc');
-    if (box && pc) return box.value + '\u0E01\u0E25\u0E48\u0E2D\u0E07 ' + pc.value + '\u0E15\u0E31\u0E27';
-    var el = document.getElementById(prefix);
-    return el ? el.value : '0';
-  }
-
-  var SHEET_URL = 'https://script.google.com/macros/s/AKfycby0tNfxuwJVdq7j9WMXvdBbSXWsu4md7tyBHSkceykHg1xbenltdwTE265lO3jui7A6Xg/exec';
-
-  function sendData() {
-    var rows = items.map(function(item, i) {
-      var usedCell = document.getElementById('used_' + i);
-      return {
-        item: item,
-        old: getVal('old_' + i),
-        in:  getVal('in_' + i),
-        cut: getVal('cut_' + i),
-        rem: getVal('rem_' + i),
-        used: usedCell ? usedCell.textContent : '0'
-      };
-    });
-    var note = document.getElementById('noteInput').value;
-    var date = document.getElementById('dateDisplay').textContent;
-    var btn = document.querySelector('.btn-send');
-    btn.disabled = true;
-    btn.textContent = '\u0E01\u0E33\u0E25\u0E31\u0E07\u0E2A\u0E48\u0E07...';
-
-    html2canvas(document.getElementById('captureArea'), {
-      scale: 1.5,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      logging: false
-    }).then(function(canvas) {
-      var imageBase64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
-      fetch(SHEET_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date: date, rows: rows, note: note, imageBase64: imageBase64 })
-      }).then(function() {
-        alert('\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E40\u0E23\u0E35\u0E22\u0E1A\u0E23\u0E49\u0E2D\u0E22\u0E41\u0E25\u0E49\u0E27! \u2705\n\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01\u0E25\u0E09 Google Drive \u0E41\u0E25\u0E49\u0E27');
-        btn.disabled = false;
-        btn.textContent = '\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25';
-      }).catch(function(err) {
-        alert('\u0E40\u0E01\u0E34\u0E14\u0E02\u0E49\u0E2D\u0E1C\u0E34\u0E14\u0E1E\u0E25\u0E32\u0E14 \u274C\n' + err.message);
-        btn.disabled = false;
-        btn.textContent = '\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25';
-      });
-    }).catch(function(err) {
-      fetch(SHEET_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date: date, rows: rows, note: note })
-      }).then(function() {
-        alert('\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25\u0E40\u0E23\u0E35\u0E22\u0E1A\u0E23\u0E49\u0E2D\u0E22! \u2705');
-        btn.disabled = false;
-        btn.textContent = '\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25';
-      });
-    });
-  }
+  tbody.appendChild(tr);
+});
+function getVal(prefix) {
+  var box=document.getElementById(prefix+'_box'), pc=document.getElementById(prefix+'_pc');
+  if (box&&pc) return box.value+'กล่อง '+pc.value+'ตัว';
+  var el=document.getElementById(prefix);
+  return el?el.value:'0';
+}
+var SHEET_URL='https://script.google.com/macros/s/AKfycby0tNfxuwJVdq7j9WMXvdBbSXWsu4md7tyBHSkceykHg1xbenltdwTE265lO3jui7A6Xg/exec';
+function sendData() {
+  var rows=items.map(function(item,i){ var u=document.getElementById('used_'+i); return {item:item,old:getVal('old_'+i),in:getVal('in_'+i),cut:getVal('cut_'+i),rem:getVal('rem_'+i),used:u?u.textContent:'0'}; });
+  var note=document.getElementById('noteInput').value;
+  var date=document.getElementById('dateDisplay').textContent;
+  var btn=document.querySelector('.btn-send');
+  btn.disabled=true; btn.textContent='กำลังส่ง...';
+  html2canvas(document.getElementById('captureArea'),{scale:1.5,useCORS:true,backgroundColor:'#ffffff',logging:false}).then(function(canvas){
+    var imageBase64=canvas.toDataURL('image/jpeg',0.85).split(',')[1];
+    fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:date,rows:rows,note:note,imageBase64:imageBase64})}).then(function(){ alert('ส่งข้อมูลเรียบร้อย! ✅'); btn.disabled=false; btn.textContent='ส่งข้อมูล'; }).catch(function(err){ alert('เกิดข้อผิดพลาด ❌
+'+err.message); btn.disabled=false; btn.textContent='ส่งข้อมูล'; });
+  }).catch(function(){ fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:date,rows:rows,note:note})}).then(function(){ alert('ส่งข้อมูลเรียบร้อย! ✅'); btn.disabled=false; btn.textContent='ส่งข้อมูมูล'; }); });
+}
 </script>
 </body>
-</html>
+    </html>
