@@ -6,7 +6,7 @@
 <title>Stock Daily</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }h
 body {
   font-family: 'Segoe UI', Tahoma, sans-serif;
   background: #f0f4f0;
@@ -183,7 +183,7 @@ function sendData() {
   var date=document.getElementById('dateDisplay').textContent;
   var btn=document.querySelector('.btn-send');
   btn.disabled=true; btn.textContent='กำลังส่ง...';
-  html2canvas(document.getElementById('captureArea'),{scale:1.5,useCORS:true,backgroundColor:'#ffffff',logging:false}).then(function(canvas){
+  html2canvas(document.getElementById('captureArea'),{scale:1.5,useCORS:true,backgroundColor:'#ffffff',logging:false,onclone:function(doc){var el=doc.getElementById('captureArea');el.style.overflow='visible';el.style.width='860px';el.style.maxWidth='none';var tw=el.querySelector('.table-wrap');if(tw){tw.style.overflow='visible';}}}).then(function(canvas){
     var imageBase64=canvas.toDataURL('image/jpeg',0.85).split(',')[1];
     fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:date,rows:rows,note:note,imageBase64:imageBase64})})
       .then(function(){ alert('ส่งข้อมูลเรียบร้อย! \u2705'); btn.disabled=false; btn.textContent='ส่งข้อมูล'; })
