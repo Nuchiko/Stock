@@ -6,7 +6,7 @@
 <title>Stock Daily</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }h
+* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Segoe UI', Tahoma, sans-serif;
   background: #f0f4f0;
@@ -83,14 +83,17 @@ tbody td input[type="number"]:focus {
   outline: none; border-color: #40916c;
   box-shadow: 0 0 0 2px rgba(64,145,108,0.2);
 }
-.btn-row { padding: 14px 16px; display: flex; justify-content: flex-end; }
-.btn-send {
-  background: #2d6a4f; color: #fff;
+.btn-row { padding: 14px 16px; display: flex; justify-content: flex-end; gap: 10px; }
+.btn-send, .btn-download {
   border: none; border-radius: 8px;
-  padding: 12px 32px; font-size: 1rem;
+  padding: 12px 28px; font-size: 1rem;
   font-weight: 600; cursor: pointer; transition: background 0.2s;
 }
+.btn-send { background: #2d6a4f; color: #fff; }
 .btn-send:hover { background: #1b4332; }
+.btn-download { background: #fff; color: #2d6a4f; border: 2px solid #2d6a4f; }
+.btn-download:hover { background: #e8f5e9; }
+.btn-download:disabled, .btn-send:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -119,6 +122,7 @@ tbody td input[type="number"]:focus {
     <textarea id="noteInput" placeholder="กรอกรายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
   </div>
   <div class="btn-row">
+    <button class="btn-download" onclick="downloadReceipt()">&#128229; บันทึกใบเสร็จ</button>
     <button class="btn-send" onclick="sendData()">ส่งข้อมูล</button>
   </div>
 </div>
@@ -177,13 +181,35 @@ function getVal(prefix) {
   return el?el.value:'0';
 }
 var SHEET_URL='https://script.google.com/macros/s/AKfycby0tNfxuwJVdq7j9WMXvdBbSXWsu4md7tyBHSkceykHg1xbenltdwTE265lO3jui7A6Xg/exec';
+function captureReceipt() {
+  return html2canvas(document.getElementById('captureArea'),{scale:1.5,useCORS:true,backgroundColor:'#ffffff',logging:false,onclone:function(doc){var el=doc.getElementById('captureArea');el.style.overflow='visible';el.style.width='860px';el.style.maxWidth='none';var tw=el.querySelector('.table-wrap');if(tw){tw.style.overflow='visible';}}});
+}
+function receiptFilename() {
+  var now=new Date();
+  var p=function(n){return String(n).padStart(2,'0');};
+  return 'stock-'+now.getFullYear()+p(now.getMonth()+1)+p(now.getDate())+'-'+p(now.getHours())+p(now.getMinutes())+'.jpg';
+}
+function downloadReceipt() {
+  var btn=document.querySelector('.btn-download');
+  btn.disabled=true; btn.textContent='กำลังบันทึก...';
+  captureReceipt().then(function(canvas){
+    var link=document.createElement('a');
+    link.download=receiptFilename();
+    link.href=canvas.toDataURL('image/jpeg',0.85);
+    link.click();
+    btn.disabled=false; btn.innerHTML='📥 บันทึกใบเสร็จ';
+  }).catch(function(err){
+    alert('บันทึกใบเสร็จไม่สำเร็จ ❌\n'+err.message);
+    btn.disabled=false; btn.innerHTML='📥 บันทึกใบเสร็จ';
+  });
+}
 function sendData() {
   var rows=items.map(function(item,i){ var u=document.getElementById('used_'+i); return {item:item,old:getVal('old_'+i),in:getVal('in_'+i),cut:getVal('cut_'+i),rem:getVal('rem_'+i),used:u?u.textContent:'0'}; });
   var note=document.getElementById('noteInput').value;
   var date=document.getElementById('dateDisplay').textContent;
   var btn=document.querySelector('.btn-send');
   btn.disabled=true; btn.textContent='กำลังส่ง...';
-  html2canvas(document.getElementById('captureArea'),{scale:1.5,useCORS:true,backgroundColor:'#ffffff',logging:false,onclone:function(doc){var el=doc.getElementById('captureArea');el.style.overflow='visible';el.style.width='860px';el.style.maxWidth='none';var tw=el.querySelector('.table-wrap');if(tw){tw.style.overflow='visible';}}}).then(function(canvas){
+  captureReceipt().then(function(canvas){
     var imageBase64=canvas.toDataURL('image/jpeg',0.85).split(',')[1];
     fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({date:date,rows:rows,note:note,imageBase64:imageBase64})})
       .then(function(){ alert('ส่งข้อมูลเรียบร้อย! \u2705'); btn.disabled=false; btn.textContent='ส่งข้อมูล'; })
