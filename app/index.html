@@ -146,6 +146,21 @@
     background:var(--bg2);color:var(--text);border-radius:7px;outline:none}
   .st-hpair input:focus{border-color:var(--accent2)}
   .st-hu{font-size:10px;color:var(--muted)}
+  .st-unit{font-size:12px;color:var(--muted);font-weight:400}
+  .st-count{display:flex;align-items:center;gap:12px}
+  .st-count label{font-size:13px;color:var(--muted);font-weight:700;min-width:56px}
+  .st-count input{flex:1;min-width:0;padding:13px;font-size:19px;text-align:center;border:1px solid var(--line);
+    background:var(--bg2);color:var(--text);border-radius:10px;outline:none}
+  .st-count input:focus{border-color:var(--accent2)}
+  .st-cu{font-size:14px;color:var(--accent2);font-weight:800;white-space:nowrap;flex:0 0 auto;min-width:38px;text-align:right}
+  .st-dcard{display:flex;align-items:center;gap:10px}
+  .st-thumb{position:relative;width:50px;height:50px;flex:0 0 auto;border-radius:10px;background:var(--bg2);
+    border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:26px;overflow:hidden}
+  .st-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .st-dname{flex:1;min-width:0;font-weight:800;font-size:15px;line-height:1.2}
+  .st-dcard input{width:80px;flex:0 0 auto;padding:11px 6px;font-size:18px;text-align:center;border:1px solid var(--line);
+    background:var(--bg2);color:var(--text);border-radius:10px;outline:none}
+  .st-dcard input:focus{border-color:var(--accent2)}
   textarea{width:100%;padding:12px 14px;font-size:16px;border-radius:12px;border:1px solid var(--line);
     background:var(--bg2);color:var(--text);outline:none;font-family:inherit;resize:vertical}
   textarea:focus{border-color:var(--accent2)}
@@ -326,7 +341,7 @@
     <button class="backbtn" onclick="openStock()">‹ กลับเลือกหมวด</button>
     <div class="topbar" style="padding-top:0"><div class="who" id="stc-title">หมวด</div></div>
     <div class="muted" id="stc-date" style="margin:-6px 2px 2px">—</div>
-    <div class="st-tip">กรอกเป็นกรัม · ช่อง “ใช้ไป” คำนวณให้อัตโนมัติ</div>
+    <div class="st-tip" id="stc-tip">กรอกเป็นกรัม · ช่อง “ใช้ไป” คำนวณให้อัตโนมัติ</div>
     <div id="stc-cards"></div>
     <div id="stc-form">
       <label class="page-label" style="margin-top:8px">📝 หมายเหตุ</label>
@@ -518,14 +533,32 @@ function logout(){
 
 /* ---------- MODULE TILES ---------- */
 const STOCK_GROUPS=[
-  {name:'ปลาดิบ',     icon:'🐟', items:['Salmon','Maguro','Madai','ShimaAji','Kanpachi','Aori Ika','Hokkigai','Ikura','Hotate']},
-  {name:'เครื่องดื่ม', icon:'🥤', items:[]},
-  {name:'ผัก',        icon:'🥬', items:[]},
-  {name:'เนื้อสัตว์',  icon:'🥩', items:[]}
+  {name:'ปลาดิบ', icon:'🐟', cut:true, items:[
+    'Salmon','Maguro','Madai','ShimaAji','Kanpachi','Aori Ika','Hokkigai','Ikura',{n:'Hotate',hotate:true}
+  ]},
+  {name:'เครื่องดื่ม', icon:'🥤', count:true, items:[
+    {n:'เบียร์สดสิงห์',u:'ถัง',img:'singha-draft',e:'🍺'},{n:'เบียร์สิงห์ขวด 620ml',u:'ขวด',img:'singha-620',e:'🍺'},{n:'โซดาสิงห์ 400cc',u:'ขวด',img:'singha-soda',e:'🫧'},
+    {n:'Sapporo เบียร์สด 20L',u:'ถัง',img:'sapporo-draft',e:'🍺'},{n:'Wila Weizen 20L',u:'ถัง',img:'wila-weizen',e:'🍺'},
+    {n:'Crispy Boy Lager',u:'กระป๋อง',img:'crispy-boy',e:'🥫'},{n:'Whale Pale Ale',u:'กระป๋อง',img:'whale-pale-ale',e:'🥫'},{n:'Raven IPA',u:'กระป๋อง',img:'raven-ipa',e:'🥫'},{n:'Anan Hazy IPA',u:'กระป๋อง',img:'anan-hazy-ipa',e:'🥫'},
+    {n:'Erdinger Weissbier',u:'ขวด',img:'erdinger-weissbier',e:'🍺'},{n:'Erdinger Dunkel',u:'ขวด',img:'erdinger-dunkel',e:'🍺'},{n:'Vana Pomegranate',u:'ขวด',img:'vana-pomegranate',e:'🍺'},
+    {n:'Inata Hime 300ml',u:'ขวด',img:'inata-hime',e:'🍶'},{n:'Born Junsui 300ml',u:'ขวด',img:'born-junsui',e:'🍶'},{n:'Hanzo Karakuchi 300ml',u:'ขวด',img:'hanzo-karakuchi',e:'🍶'},{n:'Mitake 900ml',u:'ขวด',img:'mitake',e:'🍶'},
+    {n:'Kuro Kirishima 900ml',u:'ขวด',img:'kuro-kirishima',e:'🥃'},{n:'Kakubin 700ml',u:'ขวด',img:'kakubin',e:'🥃'},{n:'Regency บรั่นดี',u:'ขวด',img:'regency',e:'🥃'},
+    {n:'Kotsuzumi Plumtonic 1500ml',u:'ขวด',img:'kotsuzumi-plumtonic',e:'🍶'},{n:'Shio Yuzu 720ml',u:'ขวด',img:'shio-yuzu-720',e:'🍶'},{n:'Shio Yuzu 1800ml',u:'ขวด',img:'shio-yuzu-1800',e:'🍶'},
+    {n:'Sauvignon Blanc',u:'ขวด',img:'sauvignon-blanc',e:'🍷'},{n:'Bordeaux',u:'ขวด',img:'bordeaux',e:'🍷'},{n:'Brut (สปาร์กลิง)',u:'ขวด',img:'brut',e:'🍾'},{n:'Chianti',u:'ขวด',img:'chianti',e:'🍷'},{n:'Soave',u:'ขวด',img:'soave',e:'🍷'},{n:'Chardonnay',u:'ขวด',img:'chardonnay',e:'🍷'},
+    {n:'Oolong Tea 500ml',u:'ขวด',img:'oolong-tea',e:'🍵'},
+    {n:'สิงห์ น้ำดื่ม 600ml',u:'ขวด',img:'singha-water',e:'💧'},{n:'โค้ก',u:'กระป๋อง',img:'coke',e:'🥤'},{n:'โค้ก Zero',u:'กระป๋อง',img:'coke-zero',e:'🥤'},{n:'น้ำแข็ง',u:'ถุง',img:'ice',e:'🧊'}
+  ]},
+  {name:'ผัก', icon:'🥬', cut:false, items:[]},
+  {name:'เนื้อสัตว์', icon:'🥩', cut:false, items:[]}
 ];
-const STOCK_ITEMS=STOCK_GROUPS.reduce(function(a,g){ return a.concat(g.items); },[]);
 const HOTATE_BOX=30;
 let stCurrentGroup=0;
+const STOCK_FLAT=[];   // รายการแบนราบ + ข้อมูลแต่ละตัว (หน่วย/มีตัดแต่งไหม/เป็น Hotate ไหม)
+STOCK_GROUPS.forEach(function(g){ g.items.forEach(function(it){
+  var nm=(typeof it==='string')?it:it.n;
+  var o=(typeof it==='object')?it:{};
+  STOCK_FLAT.push({name:nm, unit:o.u||'', hotate:!!o.hotate||nm==='Hotate', cut:!!g.cut, count:!!g.count, img:o.img||'', e:o.e||g.icon});
+}); });
 
 function groupStart(gi){ var s=0; for(var k=0;k<gi;k++) s+=STOCK_GROUPS[k].items.length; return s; }
 function openStock(){   // หน้าเลือกหมวด (4 ปุ่ม)
@@ -542,11 +575,14 @@ function openStockCat(gi){   // เข้าไปกรอกหมวดที
   var g=STOCK_GROUPS[gi], start=groupStart(gi), form=document.getElementById('stc-form');
   document.getElementById('stc-title').textContent=g.icon+' '+g.name;
   document.getElementById('stc-date').textContent=thaiDateNow();
+  var tipEl=document.getElementById('stc-tip');
+  if(tipEl) tipEl.textContent = g.count ? 'นับ “จำนวนคงเหลือ” ของแต่ละชนิด · มีรูปช่วยให้ดูออกง่าย'
+                                        : 'กรอกเป็นกรัม · ช่อง “ใช้ไป” คำนวณให้อัตโนมัติ';
   if(!g.items.length){
     document.getElementById('stc-cards').innerHTML='<div class="st-empty">ยังไม่มีรายการในหมวดนี้ — เดี๋ยวเพิ่มทีหลัง</div>';
     form.style.display='none';
   }else{
-    document.getElementById('stc-cards').innerHTML=g.items.map(function(item,k){ return stItemCard(item,start+k,g.icon); }).join('');
+    document.getElementById('stc-cards').innerHTML=g.items.map(function(item,k){ return stItemCard(item,start+k,g); }).join('');
     form.style.display='';
     document.getElementById('stc-note').value='';
     clearMsg(document.getElementById('stc-msg'));
@@ -561,21 +597,39 @@ function thaiDateNow(){
   return 'วัน'+days[d.getDay()]+'ที่ '+d.getDate()+' '+months[d.getMonth()]+' '+(d.getFullYear()+543)+' '+p(d.getHours())+':'+p(d.getMinutes());
 }
 function stNi(id){ return '<input id="'+id+'" type="number" inputmode="numeric" min="0" placeholder="0" oninput="calcStockUsed()">'; }
-function stItemCard(item,i,icon){
-  if(item==='Hotate'){
+function stItemCard(item,i,group){
+  var meta=STOCK_FLAT[i], name=meta.name, unit=meta.unit, icon=group.icon;
+  if(meta.hotate){
     const pair=pfx=>'<div class="st-hpair">'+stNi(pfx+'_box')+'<span class="st-hu">กล่อง</span>'+stNi(pfx+'_pc')+'<span class="st-hu">ตัว</span></div>';
-    return '<div class="st-card"><div class="st-top"><span class="st-n">🐚 '+item+'</span><span class="st-u" id="used_'+i+'">0 ตัว</span></div>'+
+    return '<div class="st-card"><div class="st-top"><span class="st-n">🐚 '+name+'</span><span class="st-u" id="used_'+i+'">0 ตัว</span></div>'+
       '<div class="st-hrow">'+
         '<div class="st-hf"><label>ของเดิม</label>'+pair('old_'+i)+'</div>'+
         '<div class="st-hf"><label>ของเข้า</label>'+pair('in_'+i)+'</div>'+
         '<div class="st-hf"><label>เหลือ</label>'+pair('rem_'+i)+'</div>'+
       '</div></div>';
   }
-  return '<div class="st-card"><div class="st-top"><span class="st-n">'+icon+' '+item+'</span><span class="st-u" id="used_'+i+'">0</span></div>'+
-    '<div class="st-row">'+
+  if(group.count){   // เครื่องดื่ม: บรรทัดเดียว — รูป + ชื่อ + ช่องเลข + หน่วย (ช่วยพนักงานต่างด้าวดูรูปออก)
+    var src=meta.img?('drinks/'+meta.img+'.jpg'):'';
+    var thumb='<div class="st-thumb">'+esc(meta.e||icon)+(src?('<img src="'+src+'" alt="" loading="lazy" onerror="this.remove()">'):'')+'</div>';
+    return '<div class="st-card st-dcard">'+thumb+
+      '<span class="st-dname">'+esc(name)+'</span>'+
+      stNi('rem_'+i)+'<span class="st-cu">'+esc(unit)+'</span></div>';
+  }
+  var uTag=unit?(' <span class="st-unit">('+unit+')</span>'):'';
+  var u0='0'+(unit?(' '+unit):'');
+  if(group.cut){
+    return '<div class="st-card"><div class="st-top"><span class="st-n">'+icon+' '+name+uTag+'</span><span class="st-u" id="used_'+i+'">'+u0+'</span></div>'+
+      '<div class="st-row">'+
+        '<div class="st-f"><label>เดิม</label>'+stNi('old_'+i)+'</div>'+
+        '<div class="st-f"><label>เข้า</label>'+stNi('in_'+i)+'</div>'+
+        '<div class="st-f"><label>แต่ง</label>'+stNi('cut_'+i)+'</div>'+
+        '<div class="st-f"><label>เหลือ</label>'+stNi('rem_'+i)+'</div>'+
+      '</div></div>';
+  }
+  return '<div class="st-card"><div class="st-top"><span class="st-n">'+icon+' '+name+uTag+'</span><span class="st-u" id="used_'+i+'">'+u0+'</span></div>'+
+    '<div class="st-row" style="grid-template-columns:repeat(3,1fr)">'+
       '<div class="st-f"><label>เดิม</label>'+stNi('old_'+i)+'</div>'+
       '<div class="st-f"><label>เข้า</label>'+stNi('in_'+i)+'</div>'+
-      '<div class="st-f"><label>แต่ง</label>'+stNi('cut_'+i)+'</div>'+
       '<div class="st-f"><label>เหลือ</label>'+stNi('rem_'+i)+'</div>'+
     '</div></div>';
 }
@@ -583,17 +637,19 @@ function stItemCard(item,i,icon){
 function stGv(id){ const el=document.getElementById(id); return el?(parseInt(el.value,10)||0):0; }
 function stRaw(id){ const el=document.getElementById(id); return el?el.value:''; }
 function computeUsed(i){
-  if(STOCK_ITEMS[i]==='Hotate'){
+  var meta=STOCK_FLAT[i];
+  if(meta.hotate){
     const u=(stGv('old_'+i+'_box')*HOTATE_BOX+stGv('old_'+i+'_pc'))
            +(stGv('in_'+i+'_box')*HOTATE_BOX+stGv('in_'+i+'_pc'))
            -(stGv('rem_'+i+'_box')*HOTATE_BOX+stGv('rem_'+i+'_pc'));
     return {num:u, used:u+'ตัว', pill:'ใช้ '+u+' ตัว'};
   }
-  const u=stGv('old_'+i)+stGv('in_'+i)-stGv('cut_'+i)-stGv('rem_'+i);
+  const u=meta.cut ? (stGv('old_'+i)+stGv('in_'+i)-stGv('cut_'+i)-stGv('rem_'+i))
+                   : (stGv('old_'+i)+stGv('in_'+i)-stGv('rem_'+i));
   return {num:u, used:String(u), pill:'ใช้ '+u.toLocaleString('en-US')};
 }
 function calcStockUsed(){
-  STOCK_ITEMS.forEach((item,i)=>{
+  STOCK_FLAT.forEach((meta,i)=>{
     const cell=document.getElementById('used_'+i); if(!cell) return;
     const c=computeUsed(i);
     cell.textContent=c.pill; cell.className='st-u'+(c.num<0?' neg':'');
@@ -616,8 +672,10 @@ async function sendStockCat(){
   const btn=document.getElementById('stc-send');
   if(String(SHEET_URL).indexOf('PASTE')===0){ msg(m,'โหมดทดลอง: ยังไม่ตั้งปลายทาง Stock — ไม่ได้ส่งข้อมูล (กันเขียนทับ Stock จริง)'); return; }
   const g=STOCK_GROUPS[stCurrentGroup], start=groupStart(stCurrentGroup);
-  const rows=g.items.map(function(item,k){ var i=start+k; return {item:item, old:stCell('old_'+i), in:stCell('in_'+i),
-    cut:item==='Hotate'?'':stRaw('cut_'+i), rem:stCell('rem_'+i), used:computeUsed(i).used}; });
+  const rows=g.items.map(function(item,k){ var i=start+k, meta=STOCK_FLAT[i];
+    if(g.count){ var v=stRaw('rem_'+i); return {item:meta.name, old:'', in:'', cut:'', rem:(v!==''?(v+' '+meta.unit):''), used:''}; }
+    return {item:meta.name, old:stCell('old_'+i), in:stCell('in_'+i),
+      cut:(meta.cut&&!meta.hotate)?stRaw('cut_'+i):'', rem:stCell('rem_'+i), used:computeUsed(i).used}; });
   const note=document.getElementById('stc-note').value;
   const date=document.getElementById('stc-date').textContent;
   const by=(ME&&(ME.nickname||ME.name))||'';
