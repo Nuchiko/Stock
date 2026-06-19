@@ -161,6 +161,19 @@
   .st-dcard input{width:80px;flex:0 0 auto;padding:11px 6px;font-size:18px;text-align:center;border:1px solid var(--line);
     background:var(--bg2);color:var(--text);border-radius:10px;outline:none}
   .st-dcard input:focus{border-color:var(--accent2)}
+  .st-cam{position:absolute;right:2px;bottom:2px;z-index:3;width:22px;height:22px;padding:0;border:none;cursor:pointer;
+    border-radius:50%;background:rgba(10,65,145,.92);color:#fff;font-size:11px;line-height:22px;text-align:center}
+  .st-thumb.uploading{opacity:.45}
+  .st-sub{margin-bottom:10px}
+  .st-sub-h{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:14px 15px;
+    border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:12px;cursor:pointer;font-family:inherit;text-align:left}
+  .st-sub-h:active{transform:scale(.995)}
+  .st-sub-t{font-weight:800;font-size:16px}
+  .st-sub-meta{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:7px;white-space:nowrap}
+  .st-sub-ar{display:inline-block;transition:transform .18s;color:var(--accent2);font-weight:800;font-size:15px}
+  .st-sub-body{display:none;padding:9px 2px 2px}
+  .st-sub[data-open="1"] .st-sub-body{display:block}
+  .st-sub[data-open="1"] .st-sub-ar{transform:rotate(180deg)}
   textarea{width:100%;padding:12px 14px;font-size:16px;border-radius:12px;border:1px solid var(--line);
     background:var(--bg2);color:var(--text);outline:none;font-family:inherit;resize:vertical}
   textarea:focus{border-color:var(--accent2)}
@@ -342,6 +355,7 @@
     <div class="topbar" style="padding-top:0"><div class="who" id="stc-title">หมวด</div></div>
     <div class="muted" id="stc-date" style="margin:-6px 2px 2px">—</div>
     <div class="st-tip" id="stc-tip">กรอกเป็นกรัม · ช่อง “ใช้ไป” คำนวณให้อัตโนมัติ</div>
+    <input type="file" id="dphoto-file" accept="image/*" capture="environment" style="display:none" onchange="onDrinkPhotoFile(this)">
     <div id="stc-cards"></div>
     <div id="stc-form">
       <label class="page-label" style="margin-top:8px">📝 หมายเหตุ</label>
@@ -537,28 +551,63 @@ const STOCK_GROUPS=[
     'Salmon','Maguro','Madai','ShimaAji','Kanpachi','Aori Ika','Hokkigai','Ikura',{n:'Hotate',hotate:true}
   ]},
   {name:'เครื่องดื่ม', icon:'🥤', count:true, items:[
-    {n:'เบียร์สดสิงห์',u:'ถัง',img:'singha-draft',e:'🍺'},{n:'เบียร์สิงห์ขวด 620ml',u:'ขวด',img:'singha-620',e:'🍺'},{n:'โซดาสิงห์ 400cc',u:'ขวด',img:'singha-soda',e:'🫧'},
-    {n:'Sapporo เบียร์สด 20L',u:'ถัง',img:'sapporo-draft',e:'🍺'},{n:'Wila Weizen 20L',u:'ถัง',img:'wila-weizen',e:'🍺'},
-    {n:'Crispy Boy Lager',u:'กระป๋อง',img:'crispy-boy',e:'🥫'},{n:'Whale Pale Ale',u:'กระป๋อง',img:'whale-pale-ale',e:'🥫'},{n:'Raven IPA',u:'กระป๋อง',img:'raven-ipa',e:'🥫'},{n:'Anan Hazy IPA',u:'กระป๋อง',img:'anan-hazy-ipa',e:'🥫'},
-    {n:'Erdinger Weissbier',u:'ขวด',img:'erdinger-weissbier',e:'🍺'},{n:'Erdinger Dunkel',u:'ขวด',img:'erdinger-dunkel',e:'🍺'},{n:'Vana Pomegranate',u:'ขวด',img:'vana-pomegranate',e:'🍺'},
-    {n:'Inata Hime 300ml',u:'ขวด',img:'inata-hime',e:'🍶'},{n:'Born Junsui 300ml',u:'ขวด',img:'born-junsui',e:'🍶'},{n:'Hanzo Karakuchi 300ml',u:'ขวด',img:'hanzo-karakuchi',e:'🍶'},{n:'Mitake 900ml',u:'ขวด',img:'mitake',e:'🍶'},
-    {n:'Kuro Kirishima 900ml',u:'ขวด',img:'kuro-kirishima',e:'🥃'},{n:'Kakubin 700ml',u:'ขวด',img:'kakubin',e:'🥃'},{n:'Regency บรั่นดี',u:'ขวด',img:'regency',e:'🥃'},
-    {n:'Kotsuzumi Plumtonic 1500ml',u:'ขวด',img:'kotsuzumi-plumtonic',e:'🍶'},{n:'Shio Yuzu 720ml',u:'ขวด',img:'shio-yuzu-720',e:'🍶'},{n:'Shio Yuzu 1800ml',u:'ขวด',img:'shio-yuzu-1800',e:'🍶'},
-    {n:'Sauvignon Blanc',u:'ขวด',img:'sauvignon-blanc',e:'🍷'},{n:'Bordeaux',u:'ขวด',img:'bordeaux',e:'🍷'},{n:'Brut (สปาร์กลิง)',u:'ขวด',img:'brut',e:'🍾'},{n:'Chianti',u:'ขวด',img:'chianti',e:'🍷'},{n:'Soave',u:'ขวด',img:'soave',e:'🍷'},{n:'Chardonnay',u:'ขวด',img:'chardonnay',e:'🍷'},
-    {n:'Oolong Tea 500ml',u:'ขวด',img:'oolong-tea',e:'🍵'},
-    {n:'สิงห์ น้ำดื่ม 600ml',u:'ขวด',img:'singha-water',e:'💧'},{n:'โค้ก',u:'กระป๋อง',img:'coke',e:'🥤'},{n:'โค้ก Zero',u:'กระป๋อง',img:'coke-zero',e:'🥤'},{n:'น้ำแข็ง',u:'ถุง',img:'ice',e:'🧊'}
+    {n:'เบียร์สดสิงห์',u:'ถัง',img:'singha-draft',e:'🍺',sub:'เบียร์'},
+    {n:'เบียร์สิงห์ขวด 620ml',u:'ขวด',img:'singha-620',e:'🍺',sub:'เบียร์'},
+    {n:'Sapporo เบียร์สด 20L',u:'ถัง',img:'sapporo-draft',e:'🍺',sub:'เบียร์'},
+    {n:'Wila Weizen 20L',u:'ถัง',img:'wila-weizen',e:'🍺',sub:'เบียร์'},
+    {n:'Crispy Boy Lager',u:'กระป๋อง',img:'crispy-boy',e:'🥫',sub:'เบียร์'},
+    {n:'Whale Pale Ale',u:'กระป๋อง',img:'whale-pale-ale',e:'🥫',sub:'เบียร์'},
+    {n:'Raven IPA',u:'กระป๋อง',img:'raven-ipa',e:'🥫',sub:'เบียร์'},
+    {n:'Anan Hazy IPA',u:'กระป๋อง',img:'anan-hazy-ipa',e:'🥫',sub:'เบียร์'},
+    {n:'Erdinger Weissbier',u:'ขวด',img:'erdinger-weissbier',e:'🍺',sub:'เบียร์'},
+    {n:'Erdinger Dunkel',u:'ขวด',img:'erdinger-dunkel',e:'🍺',sub:'เบียร์'},
+    {n:'Vana Pomegranate',u:'ขวด',img:'vana-pomegranate',e:'🍺',sub:'เบียร์'},
+    {n:'Inata Hime 300ml',u:'ขวด',img:'inata-hime',e:'🍶',sub:'สาเก'},
+    {n:'Born Junsui 300ml',u:'ขวด',img:'born-junsui',e:'🍶',sub:'สาเก'},
+    {n:'Hanzo Karakuchi 300ml',u:'ขวด',img:'hanzo-karakuchi',e:'🍶',sub:'สาเก'},
+    {n:'Mitake 900ml',u:'ขวด',img:'mitake',e:'🍶',sub:'สาเก'},
+    {n:'Kuro Kirishima 900ml',u:'ขวด',img:'kuro-kirishima',e:'🥃',sub:'โชจู / วิสกี้ / บรั่นดี'},
+    {n:'Kakubin 700ml',u:'ขวด',img:'kakubin',e:'🥃',sub:'โชจู / วิสกี้ / บรั่นดี'},
+    {n:'Regency บรั่นดี',u:'ขวด',img:'regency',e:'🥃',sub:'โชจู / วิสกี้ / บรั่นดี'},
+    {n:'Kotsuzumi Plumtonic 1500ml',u:'ขวด',img:'kotsuzumi-plumtonic',e:'🍶',sub:'อุเมะชุ / ยูซุ'},
+    {n:'Shio Yuzu 720ml',u:'ขวด',img:'shio-yuzu-720',e:'🍶',sub:'อุเมะชุ / ยูซุ'},
+    {n:'Shio Yuzu 1800ml',u:'ขวด',img:'shio-yuzu-1800',e:'🍶',sub:'อุเมะชุ / ยูซุ'},
+    {n:'Sauvignon Blanc',u:'ขวด',img:'sauvignon-blanc',e:'🍷',sub:'ไวน์'},
+    {n:'Bordeaux',u:'ขวด',img:'bordeaux',e:'🍷',sub:'ไวน์'},
+    {n:'Brut (สปาร์กลิง)',u:'ขวด',img:'brut',e:'🍾',sub:'ไวน์'},
+    {n:'Chianti',u:'ขวด',img:'chianti',e:'🍷',sub:'ไวน์'},
+    {n:'Soave',u:'ขวด',img:'soave',e:'🍷',sub:'ไวน์'},
+    {n:'Chardonnay',u:'ขวด',img:'chardonnay',e:'🍷',sub:'ไวน์'},
+    {n:'โซดาสิงห์ 400cc',u:'ขวด',img:'singha-soda',e:'🫧',sub:'น้ำ / ซอฟต์ดริงก์ / ชา / น้ำแข็ง'},
+    {n:'Oolong Tea 500ml',u:'ขวด',img:'oolong-tea',e:'🍵',sub:'น้ำ / ซอฟต์ดริงก์ / ชา / น้ำแข็ง'},
+    {n:'สิงห์ น้ำดื่ม 600ml',u:'ขวด',img:'singha-water',e:'💧',sub:'น้ำ / ซอฟต์ดริงก์ / ชา / น้ำแข็ง'},
+    {n:'โค้ก',u:'กระป๋อง',img:'coke',e:'🥤',sub:'น้ำ / ซอฟต์ดริงก์ / ชา / น้ำแข็ง'},
+    {n:'โค้ก Zero',u:'กระป๋อง',img:'coke-zero',e:'🥤',sub:'น้ำ / ซอฟต์ดริงก์ / ชา / น้ำแข็ง'},
+    {n:'น้ำแข็ง',u:'ถุง',img:'ice',e:'🧊',sub:'น้ำ / ซอฟต์ดริงก์ / ชา / น้ำแข็ง'}
   ]},
   {name:'ผัก', icon:'🥬', cut:false, items:[]},
   {name:'เนื้อสัตว์', icon:'🥩', cut:false, items:[]}
 ];
 const HOTATE_BOX=30;
 let stCurrentGroup=0;
+let DRINK_PHOTOS={};          // slug -> URL รูปที่อัปไว้ (จากเซิร์ฟเวอร์ Mana App)
+let DRINK_UPLOAD_ON=false;    // เปิดปุ่ม 📷 อัปรูป = true หลัง deploy หลังบ้าน (มีคำสั่ง setDrinkPhoto)
+let DRINK_PHOTOS_LOADED=false;
+let _dpSlug=null, _dpIndex=null;   // กำลังอัปรูปของตัวไหน
 const STOCK_FLAT=[];   // รายการแบนราบ + ข้อมูลแต่ละตัว (หน่วย/มีตัดแต่งไหม/เป็น Hotate ไหม)
 STOCK_GROUPS.forEach(function(g){ g.items.forEach(function(it){
   var nm=(typeof it==='string')?it:it.n;
   var o=(typeof it==='object')?it:{};
   STOCK_FLAT.push({name:nm, unit:o.u||'', hotate:!!o.hotate||nm==='Hotate', cut:!!g.cut, count:!!g.count, img:o.img||'', e:o.e||g.icon});
 }); });
+const DRINK_SUBS=[   // กลุ่มย่อยของเครื่องดื่ม (ลำดับ+ไอคอนหัวกลุ่ม) — แตะเพื่อกาง
+  {name:'เบียร์',icon:'🍺'},
+  {name:'สาเก',icon:'🍶'},
+  {name:'โชจู / วิสกี้ / บรั่นดี',icon:'🥃'},
+  {name:'อุเมะชุ / ยูซุ',icon:'🍵'},
+  {name:'ไวน์',icon:'🍷'},
+  {name:'น้ำ / ซอฟต์ดริงก์ / ชา / น้ำแข็ง',icon:'🥤'}
+];
 
 function groupStart(gi){ var s=0; for(var k=0;k<gi;k++) s+=STOCK_GROUPS[k].items.length; return s; }
 function openStock(){   // หน้าเลือกหมวด (4 ปุ่ม)
@@ -576,20 +625,37 @@ function openStockCat(gi){   // เข้าไปกรอกหมวดที
   document.getElementById('stc-title').textContent=g.icon+' '+g.name;
   document.getElementById('stc-date').textContent=thaiDateNow();
   var tipEl=document.getElementById('stc-tip');
-  if(tipEl) tipEl.textContent = g.count ? 'นับ “จำนวนคงเหลือ” ของแต่ละชนิด · มีรูปช่วยให้ดูออกง่าย'
+  if(tipEl) tipEl.textContent = g.count ? 'แตะกลุ่มเพื่อกางรายการ · ใส่จำนวนคงเหลือ (มีรูปช่วยดู)'
                                         : 'กรอกเป็นกรัม · ช่อง “ใช้ไป” คำนวณให้อัตโนมัติ';
   if(!g.items.length){
     document.getElementById('stc-cards').innerHTML='<div class="st-empty">ยังไม่มีรายการในหมวดนี้ — เดี๋ยวเพิ่มทีหลัง</div>';
     form.style.display='none';
   }else{
-    document.getElementById('stc-cards').innerHTML=g.items.map(function(item,k){ return stItemCard(item,start+k,g); }).join('');
+    document.getElementById('stc-cards').innerHTML = g.count
+      ? renderDrinkGroups(g,start)
+      : g.items.map(function(item,k){ return stItemCard(item,start+k,g); }).join('');
     form.style.display='';
     document.getElementById('stc-note').value='';
     clearMsg(document.getElementById('stc-msg'));
     calcStockUsed();
+    if(g.count && DRINK_UPLOAD_ON){ loadDrinkPhotos().then(applyDrinkPhotos); }   // โหลดรูปที่อัปไว้แล้วแปะทับ (เปิดหลัง deploy หลังบ้าน)
   }
   show('stockcat');
 }
+function renderDrinkGroups(g,start){   // เรนเดอร์เครื่องดื่มเป็นกลุ่มย่อยพับได้ (accordion)
+  return DRINK_SUBS.map(function(sg){
+    var rows=[];
+    g.items.forEach(function(item,k){ if(typeof item==='object' && item.sub===sg.name) rows.push(stItemCard(item,start+k,g)); });
+    if(!rows.length) return '';
+    return '<div class="st-sub" data-open="0">'+
+      '<button type="button" class="st-sub-h" onclick="toggleSub(this)">'+
+        '<span class="st-sub-t">'+sg.icon+' '+esc(sg.name)+'</span>'+
+        '<span class="st-sub-meta">'+rows.length+' รายการ <span class="st-sub-ar">▾</span></span>'+
+      '</button>'+
+      '<div class="st-sub-body">'+rows.join('')+'</div></div>';
+  }).join('');
+}
+function toggleSub(btn){ var s=btn.parentNode; s.setAttribute('data-open', s.getAttribute('data-open')==='1'?'0':'1'); }
 function thaiDateNow(){
   const d=new Date(), p=n=>String(n).padStart(2,'0');
   const days=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
@@ -609,8 +675,10 @@ function stItemCard(item,i,group){
       '</div></div>';
   }
   if(group.count){   // เครื่องดื่ม: บรรทัดเดียว — รูป + ชื่อ + ช่องเลข + หน่วย (ช่วยพนักงานต่างด้าวดูรูปออก)
-    var src=meta.img?('drinks/'+meta.img+'.jpg'):'';
-    var thumb='<div class="st-thumb">'+esc(meta.e||icon)+(src?('<img src="'+src+'" alt="" loading="lazy" onerror="this.remove()">'):'')+'</div>';
+    var up=DRINK_PHOTOS[meta.img]||'';                       // รูปที่อัปไว้ (ถ้ามี) มาก่อน
+    var src=up||(meta.img?('drinks/'+meta.img+'.jpg'):'');   // ไม่มี → รูปในเครื่อง → ไม่มีอีก → อิโมจิ
+    var cam=(DRINK_UPLOAD_ON&&ME&&ME.is_admin&&meta.img)?('<button type="button" class="st-cam" title="ใส่/เปลี่ยนรูป" onclick="pickDrinkPhoto(\''+meta.img+'\','+i+')">📷</button>'):'';
+    var thumb='<div class="st-thumb" id="thumb_'+i+'">'+esc(meta.e||icon)+(src?('<img src="'+esc(src)+'" alt="" loading="lazy" onerror="this.remove()">'):'')+cam+'</div>';
     return '<div class="st-card st-dcard">'+thumb+
       '<span class="st-dname">'+esc(name)+'</span>'+
       stNi('rem_'+i)+'<span class="st-cu">'+esc(unit)+'</span></div>';
@@ -689,6 +757,51 @@ async function sendStockCat(){
     busy(btn,false,'ส่งข้อมูล');
     msg(m,'✅ ส่ง '+g.name+' เรียบร้อย','ok');
   }catch(e){ busy(btn,false,'ส่งข้อมูล'); msg(m,'ส่งไม่สำเร็จ: '+(e.message||e)); }
+}
+/* ---------- รูปเครื่องดื่ม (โหลด/อัปโหลด) ---------- */
+async function loadDrinkPhotos(force){
+  if(DRINK_PHOTOS_LOADED&&!force) return;
+  try{ const r=await api('drinkPhotos'); if(r&&r.ok&&r.photos){ DRINK_PHOTOS=r.photos; } DRINK_PHOTOS_LOADED=true; }catch(e){}
+}
+function applyDrinkPhotos(){   // แปะรูปที่อัปไว้ทับการ์ดที่เรนเดอร์แล้ว
+  STOCK_FLAT.forEach(function(meta,i){
+    if(!meta.count||!meta.img) return;
+    var url=DRINK_PHOTOS[meta.img]; if(!url) return;
+    var thumb=document.getElementById('thumb_'+i); if(!thumb) return;
+    var im=thumb.querySelector('img');
+    if(im){ im.src=url; }
+    else{ im=document.createElement('img'); im.alt=''; im.loading='lazy'; im.onerror=function(){this.remove();}; im.src=url; thumb.insertBefore(im, thumb.querySelector('.st-cam')); }
+  });
+}
+function pickDrinkPhoto(slug,i){ _dpSlug=slug; _dpIndex=i; var f=document.getElementById('dphoto-file'); f.value=''; f.click(); }
+function onDrinkPhotoFile(input){
+  var file=input.files&&input.files[0]; if(!file) return;
+  var slug=_dpSlug, i=_dpIndex;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var img=new Image();
+    img.onload=function(){   // ย่อ + ครอปกลางเป็นจัตุรัส ~400px แล้วส่งเป็น jpeg (ไฟล์เล็ก)
+      var S=400, cv=document.createElement('canvas'); cv.width=S; cv.height=S;
+      var side=Math.min(img.width,img.height), sx=(img.width-side)/2, sy=(img.height-side)/2;
+      cv.getContext('2d').drawImage(img, sx,sy,side,side, 0,0,S,S);
+      uploadDrinkPhoto(slug,i,cv.toDataURL('image/jpeg',0.85).split(',')[1]);
+    };
+    img.onerror=function(){ alert('อ่านรูปไม่ได้ ลองรูปอื่นครับ'); };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+async function uploadDrinkPhoto(slug,i,b64){
+  var thumb=document.getElementById('thumb_'+i); if(thumb) thumb.classList.add('uploading');
+  var r=await api('setDrinkPhoto',{slug:slug, imageBase64:b64, mime:'image/jpeg'});
+  if(thumb) thumb.classList.remove('uploading');
+  if(!r||!r.ok){ alert('อัปรูปไม่สำเร็จ: '+((r&&r.error)||'ลองใหม่')); return; }
+  DRINK_PHOTOS[slug]=r.url;
+  if(thumb){
+    var old=thumb.querySelector('img'); if(old) old.remove();
+    var im=document.createElement('img'); im.alt=''; im.onerror=function(){this.remove();}; im.src=r.url+'&t='+Date.now();
+    thumb.insertBefore(im, thumb.querySelector('.st-cam'));
+  }
 }
 function comingSoon(name){ alert('“'+name+'” กำลังพัฒนา จะเปิดให้ใช้เร็ว ๆ นี้ครับ'); }
 
