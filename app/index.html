@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a4191">
+<title>Mana Mana — ระบบร้าน</title>
+<style>
+  :root{
+    --bg:#1a1614; --bg2:#241e1a; --card:#2c2520; --line:#3a322c;
+    --accent:#d8492f; --accent2:#e9763f; --gold:#e3b23c;
+    --text:#f4ece2; --muted:#a99b8c; --ok:#4caf72; --danger:#e0533d;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,"Segoe UI",Roboto,"Noto Sans Thai","Helvetica Neue",sans-serif;
+    background:radial-gradient(140% 100% at 50% 0%,#2a221d 0%,var(--bg) 55%);
+    color:var(--text); min-height:100vh; line-height:1.55; font-size:16px;
+  }
+  .wrap{max-width:480px;margin:0 auto;padding:0 18px 40px;min-height:100vh}
+  .hidden{display:none!important}
+
+  /* Brand / header */
+  .brandmark{display:flex;flex-direction:column;align-items:center;gap:6px;padding:46px 0 22px}
+  .brandmark .ja{font-size:13px;letter-spacing:6px;color:var(--gold);font-weight:600}
+  .brandmark h1{margin:0;font-size:30px;letter-spacing:1px;font-weight:800}
+  .brandmark .sub{font-size:13px;color:var(--muted)}
+  .seal{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 8px 24px rgba(216,73,47,.35);margin-bottom:6px}
+
+  /* Cards & inputs */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  label{display:block;font-size:13px;color:var(--muted);margin:14px 0 6px;font-weight:600}
+  label:first-child{margin-top:0}
+  input,select{width:100%;padding:14px 16px;font-size:17px;border-radius:12px;border:1px solid var(--line);
+    background:var(--bg2);color:var(--text);outline:none;transition:border .15s}
+  input:focus,select:focus{border-color:var(--accent2)}
+  input::placeholder{color:#6f6357}
+  .pin-input{letter-spacing:8px;text-align:center;font-size:22px}
+
+  .btn{width:100%;padding:15px;font-size:17px;font-weight:700;border:none;border-radius:12px;cursor:pointer;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;margin-top:18px;
+    box-shadow:0 8px 20px rgba(216,73,47,.3);transition:transform .08s,opacity .15s}
+  .btn:active{transform:translateY(1px)}
+  .btn[disabled]{opacity:.55;cursor:default}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text);box-shadow:none}
+  .btn.sm{width:auto;padding:9px 14px;font-size:14px;margin-top:0}
+  .btn.danger{background:linear-gradient(135deg,#c0392b,#e0533d)}
+
+  .msg{font-size:14px;padding:11px 14px;border-radius:10px;margin-top:14px;display:none}
+  .msg.show{display:block}
+  .msg.err{background:rgba(224,83,61,.14);color:#ffb4a6;border:1px solid rgba(224,83,61,.3)}
+  .msg.ok{background:rgba(76,175,114,.14);color:#b6e7c6;border:1px solid rgba(76,175,114,.3)}
+
+  /* Top bar (home) */
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:22px 0 14px}
+  .topbar .hi{font-size:13px;color:var(--muted)}
+  .topbar .who{font-size:20px;font-weight:800;display:flex;align-items:center;gap:8px}
+  .chip{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;letter-spacing:.5px}
+  .chip.owner{background:rgba(227,178,60,.18);color:var(--gold);border:1px solid rgba(227,178,60,.4)}
+  .chip.manager{background:rgba(233,118,63,.18);color:var(--accent2);border:1px solid rgba(233,118,63,.4)}
+  .chip.staff{background:rgba(169,155,140,.15);color:var(--muted);border:1px solid var(--line)}
+  .avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px}
+
+  /* Module grid */
+  .sect-title{font-size:13px;color:var(--muted);font-weight:700;margin:20px 4px 10px;letter-spacing:.5px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 16px;
+    cursor:pointer;transition:transform .08s,border .15s;position:relative;overflow:hidden;min-height:108px;
+    display:flex;flex-direction:column;justify-content:space-between}
+  .tile:active{transform:scale(.98)}
+  .tile:hover{border-color:var(--accent2)}
+  .tile .ico{font-size:30px}
+  .tile .tname{font-weight:700;font-size:16px;margin-top:8px}
+  .tile .tdesc{font-size:12px;color:var(--muted)}
+  .tile.soon{opacity:.6}
+  .tile .soon-tag{position:absolute;top:10px;right:10px;font-size:10px;font-weight:700;color:var(--muted);
+    background:var(--bg2);border:1px solid var(--line);padding:2px 7px;border-radius:999px}
+  .tile.admin{background:linear-gradient(160deg,#332019,#2c2520);border-color:rgba(227,178,60,.3)}
+
+  /* Employee list */
+  .emp{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:11px}
+  .emp .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .emp .nm{font-weight:700;font-size:16px}
+  .emp .meta{font-size:13px;color:var(--muted);margin-top:2px}
+  .emp .acts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .dot.on{background:var(--ok)} .dot.off{background:#6f6357}
+
+  .backbtn{background:none;border:none;color:var(--accent2);font-size:15px;font-weight:600;cursor:pointer;
+    padding:18px 0 6px;display:flex;align-items:center;gap:6px}
+
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.62);display:flex;align-items:flex-end;justify-content:center;
+    z-index:50;padding:0}
+  .sheet{background:var(--bg2);border:1px solid var(--line);border-radius:22px 22px 0 0;width:100%;max-width:480px;
+    padding:22px 18px calc(22px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto;animation:up .22s ease}
+  @keyframes up{from{transform:translateY(40px);opacity:.5}to{transform:translateY(0);opacity:1}}
+  .sheet h3{margin:0 0 4px;font-size:19px}
+  .sheet .hint{font-size:13px;color:var(--muted);margin-bottom:8px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+  .center{text-align:center}
+  .muted{color:var(--muted)}
+  .spinner{width:20px;height:20px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;
+    display:inline-block;animation:spin .7s linear infinite;vertical-align:middle}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .footnote{text-align:center;font-size:11px;color:#6f6357;margin-top:26px}
+
+  /* Stock (ฝังฟอร์มเดิม) */
+  .frame-wrap{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;
+    height:calc(100vh - 130px);min-height:460px}
+  .frame-wrap iframe{width:100%;height:100%;border:0;display:block}
+
+  /* Stock form (แบบ B — แถวกะทัดรัด) */
+  .st-tip{font-size:12px;color:var(--muted);margin:6px 2px 14px}
+  .st-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:9px}
+  .st-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px}
+  .st-n{font-weight:800;font-size:16px}
+  .st-u{font-size:14px;font-weight:800;color:var(--accent2);background:var(--bg2);border:1px solid var(--line);
+    padding:3px 12px;border-radius:999px;white-space:nowrap}
+  .st-u.neg{color:var(--danger);border-color:rgba(224,83,61,.45)}
+  .st-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+  .st-f label{display:block;font-size:11px;color:var(--muted);text-align:center;margin-bottom:3px}
+  .st-f input{width:100%;padding:10px 4px;font-size:16px;text-align:center;border:1px solid var(--line);
+    background:var(--bg2);color:var(--text);border-radius:9px;outline:none}
+  .st-f input:focus{border-color:var(--accent2)}
+  .st-hrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+  .st-hf label{display:block;font-size:11px;color:var(--muted);text-align:center;margin-bottom:3px}
+  .st-hpair{display:flex;align-items:center;gap:2px}
+  .st-hpair input{width:100%;min-width:0;padding:9px 2px;font-size:14px;text-align:center;border:1px solid var(--line);
+    background:var(--bg2);color:var(--text);border-radius:7px;outline:none}
+  .st-hpair input:focus{border-color:var(--accent2)}
+  .st-hu{font-size:10px;color:var(--muted)}
+  textarea{width:100%;padding:12px 14px;font-size:16px;border-radius:12px;border:1px solid var(--line);
+    background:var(--bg2);color:var(--text);outline:none;font-family:inherit;resize:vertical}
+  textarea:focus{border-color:var(--accent2)}
+  /* capture sheet (รูปส่ง LINE — โทนสว่าง อ่านง่าย) อยู่นอกจอ */
+  #st-capture{position:fixed;left:-10000px;top:0;width:720px;background:#fff;color:#1b3b2f;padding:22px;
+    font-family:'Segoe UI',Tahoma,'Noto Sans Thai',sans-serif}
+  #st-capture .cap-h{font-size:24px;font-weight:800;color:#2d6a4f}
+  #st-capture .cap-sub{font-size:14px;color:#555;margin:2px 0 14px}
+  #st-capture .cap-t{width:100%;border-collapse:collapse;font-size:15px}
+  #st-capture .cap-t th{background:#40916c;color:#fff;padding:9px 8px;text-align:center}
+  #st-capture .cap-t th:first-child{text-align:left}
+  #st-capture .cap-t td{border-bottom:1px solid #e0e0e0;padding:8px;text-align:center;color:#222}
+  #st-capture .cap-t td.it{text-align:left;font-weight:700;color:#1b4332}
+  #st-capture .cap-t td.u{background:#fff3e0;font-weight:800;color:#e65100}
+  #st-capture .cap-note{margin-top:12px;font-size:14px;color:#333}
+
+  /* เวลาเข้างาน */
+  .clock{font-size:44px;font-weight:800;text-align:center;letter-spacing:1px;margin-top:2px}
+  .clockdate{text-align:center;color:var(--muted);font-size:14px;margin-bottom:16px}
+  .statuscard{text-align:center;padding:22px 20px}
+  .statuscard .badge{display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:700;
+    padding:8px 16px;border-radius:999px}
+  .badge .dot{margin-right:0}
+  .badge.in{background:rgba(76,175,114,.16);color:#9fe3b8;border:1px solid rgba(76,175,114,.4)}
+  .badge.out{background:rgba(169,155,140,.14);color:var(--muted);border:1px solid var(--line)}
+  .statuscard .since{font-size:13px;color:var(--muted);margin-top:6px}
+  .bigbtn{width:100%;padding:22px;font-size:22px;font-weight:800;border:none;border-radius:18px;cursor:pointer;
+    color:#fff;box-shadow:0 10px 28px rgba(0,0,0,.3);transition:transform .08s}
+  .bigbtn:active{transform:scale(.98)} .bigbtn[disabled]{opacity:.6}
+  .bigbtn.in{background:linear-gradient(135deg,#3a9d63,#4caf72)}
+  .bigbtn.out{background:linear-gradient(135deg,#c0392b,#e0533d)}
+  .summary{display:flex;gap:12px;margin-top:14px}
+  .summary .box{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+  .summary .lab{font-size:12px;color:var(--muted)} .summary .val{font-size:20px;font-weight:800;margin-top:3px}
+  .rec{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:11px 14px;margin-bottom:8px;font-size:15px}
+  .rec .in{color:#9fe3b8} .rec .out{color:#f0a99b} .rec .d{color:var(--muted);font-size:13px}
+  .geo{font-size:12px;color:var(--muted);text-align:center;margin-top:12px}
+
+  /* ============= ธีมน้ำเงินเข้ม–ขาว (พื้นน้ำเงินตามโลโก้ #0a4191 การ์ดขาว) ============= */
+  :root{
+    --bg:#0a4191; --bg2:#eef3fb; --card:#ffffff; --line:#dbe5f2;
+    --accent:#0a4191; --accent2:#2f6ad8; --gold:#0a4191;
+    --text:#12243f; --muted:#5f7088; --ok:#1f9d57; --danger:#d8453f;
+  }
+  body{ background:radial-gradient(140% 100% at 50% -5%,#0c4496 0%,#072c66 72%); color:var(--text); }
+  input,textarea,select{ background:var(--bg2); color:var(--text); }
+  input::placeholder,textarea::placeholder{ color:#9aa7bd; }
+  .card,.tile,.emp,.st-card,.summary .box{ box-shadow:0 8px 24px rgba(3,18,50,.22); }
+  .btn{ background:linear-gradient(135deg,#1c62d6,#3a82ec); box-shadow:0 8px 20px rgba(4,22,65,.40); }
+  .btn.danger{ background:linear-gradient(135deg,#c0392b,#e0533d); }
+  .seal{ color:#fff; }
+  .avatar{ background:#fff; color:#0a4191; }
+  /* ข้อความบนพื้นน้ำเงิน (นอกการ์ด) = ขาว/อ่อน */
+  .brandmark .sub,#st-date,#rp-date,.clockdate{ color:rgba(255,255,255,.82); }
+  .brandbar .bn,.topbar .who,.clock{ color:#fff; }
+  .topbar .hi,.sect-title,.st-tip,.geo{ color:rgba(255,255,255,.75); }
+  .page-label{ color:rgba(255,255,255,.88); }
+  .footnote{ color:rgba(255,255,255,.5); }
+  .backbtn{ color:#bcd4f7; }
+  .adminbtn{ background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.32); color:#fff; }
+  .spinner{ border:3px solid rgba(255,255,255,.32); border-top-color:#fff; }
+  /* chips บนพื้นน้ำเงิน */
+  .chip.owner{ background:#fff; color:#0a4191; border:1px solid #fff; }
+  .chip.manager{ background:rgba(255,255,255,.85); color:#1c4f93; border:1px solid rgba(255,255,255,.7); }
+  .chip.staff{ background:rgba(255,255,255,.16); color:#fff; border:1px solid rgba(255,255,255,.32); }
+  /* ในการ์ดขาว = โทนสว่างปกติ */
+  .msg.err{ background:#fdecea; color:#b23b32; border:1px solid #f3c2bc; }
+  .msg.ok{ background:#e9f6ef; color:#177a4a; border:1px solid #bfe3cd; }
+  .tile.admin{ background:linear-gradient(160deg,#eaf1fd,#ffffff); border-color:rgba(10,65,145,.25); }
+  .soon-tag{ color:#5f7088; }
+  .badge.in{ background:rgba(31,157,87,.14); color:#177a4a; border:1px solid rgba(31,157,87,.42); }
+  .badge.out{ background:#eef2f8; color:#5f7088; border:1px solid var(--line); }
+  .rec .in{ color:#177a4a; } .rec .out{ color:#b23b32; }
+  .st-u{ color:#0a4191; background:#eaf1fb; border:1px solid #d3e0f3; }
+  .st-u.neg{ color:#d8453f; background:#fdeceb; border-color:#f1c4bf; }
+  /* รูปสรุปส่ง LINE = น้ำเงินแบรนด์ */
+  #st-capture{ color:#12243f; }
+  #st-capture .cap-h{ color:#0a4191; }
+  #st-capture .cap-sub{ color:#5a6b80; }
+  #st-capture .cap-t th{ background:#0a4191; }
+  #st-capture .cap-t td.it{ color:#0a4191; }
+  #st-capture .cap-t td.u{ background:#eaf1fb; color:#0a4191; }
+  /* โลโก้ร้าน (พื้นโลโก้กลืนกับพื้นแอป — เห็นลายขาวลอยสวย) */
+  .logo-img{display:block;width:158px;height:158px;object-fit:contain;border-radius:20px;margin:0 auto 6px}
+  .brandbar{display:flex;align-items:center;gap:9px;padding:16px 2px 2px}
+  .logo-mini{width:34px;height:34px;border-radius:9px;object-fit:contain;display:block}
+  .brandbar .bn{font-weight:800;font-size:16px;letter-spacing:.3px}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ LOGIN ============ -->
+  <section id="screen-login">
+    <div class="brandmark">
+      <img class="logo-img" src="logo.jpg" alt="Mana Mana" onload="document.getElementById('brand-fb').style.display='none'" onerror="this.remove()">
+      <div id="brand-fb">
+        <div class="seal">の</div>
+        <div class="ja">まなまな</div>
+        <h1>Mana Mana</h1>
+      </div>
+      <div class="sub">ระบบหลังบ้านร้าน</div>
+    </div>
+    <div class="card">
+      <label>เบอร์มือถือ</label>
+      <input id="li-phone" type="tel" inputmode="numeric" autocomplete="username" placeholder="08x-xxx-xxxx" maxlength="15">
+      <label>PIN</label>
+      <input id="li-pin" class="pin-input" type="password" inputmode="numeric" autocomplete="current-password" placeholder="••••" maxlength="6">
+      <button class="btn" id="li-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
+      <div class="msg err" id="li-msg"></div>
+    </div>
+    <div class="footnote">ลืม PIN? แจ้งเจ้าของ/ผู้จัดการให้รีเซ็ตให้</div>
+  </section>
+
+  <!-- ============ HOME ============ -->
+  <section id="screen-home" class="hidden">
+    <div class="brandbar">
+      <img class="logo-mini" src="logo.jpg" alt="" onerror="this.remove()">
+      <span class="bn">Mana Mana</span>
+    </div>
+    <div class="topbar">
+      <div>
+        <div class="hi">ยินดีต้อนรับ 👋</div>
+        <div class="who"><span id="ho-name">—</span> <span class="chip" id="ho-chip">staff</span></div>
+      </div>
+      <div class="avatar" id="ho-avatar">M</div>
+    </div>
+
+    <div class="sect-title">ระบบงาน</div>
+    <div class="grid">
+      <div class="tile" onclick="openStock()">
+        <div class="ico">📦</div>
+        <div><div class="tname">Stock</div><div class="tdesc">กรอกสต็อกประจำวัน</div></div>
+      </div>
+      <div class="tile soon" onclick="comingSoon('เวลาเข้างาน')">
+        <span class="soon-tag">เร็ว ๆ นี้</span>
+        <div class="ico">🕘</div>
+        <div><div class="tname">เวลาเข้างาน</div><div class="tdesc">เข้า–ออกงาน</div></div>
+      </div>
+      <div class="tile soon" onclick="comingSoon('SOP')">
+        <span class="soon-tag">เร็ว ๆ นี้</span>
+        <div class="ico">📖</div>
+        <div><div class="tname">SOP</div><div class="tdesc">คู่มือ/ขั้นตอนงาน</div></div>
+      </div>
+      <div class="tile soon" onclick="comingSoon('สรุปยอดขาย')">
+        <span class="soon-tag">เร็ว ๆ นี้</span>
+        <div class="ico">📊</div>
+        <div><div class="tname">รายงาน</div><div class="tdesc">ยอดขาย/เทียบสต็อก</div></div>
+      </div>
+    </div>
+
+    <div id="ho-admin-sect" class="hidden">
+      <div class="sect-title">สำหรับผู้ดูแล</div>
+      <div class="grid">
+        <div class="tile admin" onclick="openAdmin()">
+          <div class="ico">👥</div>
+          <div><div class="tname">จัดการพนักงาน</div><div class="tdesc">เพิ่ม/แก้ไข/รีเซ็ต PIN</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sect-title">บัญชี</div>
+    <div class="card">
+      <button class="btn ghost" onclick="openChangePin()">เปลี่ยน PIN ของฉัน</button>
+      <button class="btn ghost" style="margin-top:12px" onclick="logout()">ออกจากระบบ</button>
+    </div>
+    <div class="footnote">Mana Mana Back Office</div>
+  </section>
+
+  <!-- ============ ADMIN: EMPLOYEES ============ -->
+  <section id="screen-admin" class="hidden">
+    <button class="backbtn" onclick="show('home')">‹ กลับหน้าหลัก</button>
+    <div class="topbar" style="padding-top:0">
+      <div class="who">จัดการพนักงาน</div>
+      <button class="btn sm" onclick="openEmpModal()">+ เพิ่ม</button>
+    </div>
+    <div id="emp-list"><div class="center muted" style="padding:30px 0"><span class="spinner"></span></div></div>
+  </section>
+
+  <!-- ============ STOCK (ฟอร์มใหม่ กรอกง่าย) ============ -->
+  <section id="screen-stock" class="hidden">
+    <button class="backbtn" onclick="show('home')">‹ กลับหน้าหลัก</button>
+    <div class="topbar" style="padding-top:0"><div class="who">📦 Stock ประจำวัน</div></div>
+    <div class="muted" id="st-date" style="margin:-6px 2px 2px">—</div>
+    <div class="st-tip">กรอกเป็นกรัม · ช่อง “ใช้ไป” คำนวณให้อัตโนมัติ</div>
+    <div id="st-cards"></div>
+    <label class="page-label" style="margin-top:8px">📝 หมายเหตุ</label>
+    <textarea id="st-note" rows="3" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
+    <button class="btn" id="st-send" onclick="sendStock()">ส่งข้อมูล</button>
+    <div class="msg" id="st-msg"></div>
+    <div class="footnote">บันทึกลงชีท + ส่งรูปเข้า LINE กลุ่ม Staff</div>
+  </section>
+
+  <!-- ============ เวลาเข้างาน ============ -->
+  <section id="screen-clock" class="hidden">
+    <button class="backbtn" onclick="show('home')">‹ กลับหน้าหลัก</button>
+    <div class="clock" id="ck-clock">--:--</div>
+    <div class="clockdate" id="ck-date">—</div>
+    <div class="card statuscard">
+      <span class="badge out" id="ck-badge"><span class="dot off" id="ck-dot"></span><span id="ck-status">—</span></span>
+      <div class="since" id="ck-since"></div>
+    </div>
+    <button class="bigbtn in" id="ck-action" onclick="punch()">เข้างาน</button>
+    <div class="geo" id="ck-geo"></div>
+    <div class="summary">
+      <div class="box"><div class="lab">เข้างานวันนี้</div><div class="val" id="ck-firstin">—</div></div>
+      <div class="box"><div class="lab">ออกงานล่าสุด</div><div class="val" id="ck-lastout">—</div></div>
+    </div>
+    <div id="ck-adminwrap" class="hidden">
+      <button class="btn ghost adminbtn" onclick="openReport()">📋 ดูเวลาเข้างานทั้งร้าน (วันนี้)</button>
+    </div>
+    <div class="sect-title">ประวัติล่าสุด</div>
+    <div id="ck-history"></div>
+    <div class="msg" id="ck-msg"></div>
+  </section>
+
+  <!-- ============ เวลาเข้างาน: รายงาน (ผู้ดูแล) ============ -->
+  <section id="screen-report" class="hidden">
+    <button class="backbtn" onclick="show('clock')">‹ กลับ</button>
+    <div class="topbar" style="padding-top:0"><div class="who">เวลาเข้างานวันนี้</div></div>
+    <div id="rp-date" class="muted" style="margin-bottom:10px"></div>
+    <div id="rp-list"></div>
+  </section>
+
+</div>
+
+<!-- ============ MODAL (add/edit employee) ============ -->
+<div id="modal" class="overlay hidden">
+  <div class="sheet">
+    <h3 id="m-title">เพิ่มพนักงาน</h3>
+    <div class="hint" id="m-hint"></div>
+    <label>ชื่อ–สกุล</label>
+    <input id="m-name" type="text" placeholder="เช่น สมชาย ใจดี">
+    <label>ชื่อเล่น</label>
+    <input id="m-nick" type="text" placeholder="เช่น ชาย">
+    <label>เบอร์มือถือ</label>
+    <input id="m-phone" type="tel" inputmode="numeric" placeholder="08x-xxx-xxxx" maxlength="15">
+    <div class="row2">
+      <div>
+        <label>สิทธิ์</label>
+        <select id="m-role">
+          <option value="staff">พนักงาน</option>
+          <option value="manager">ผู้จัดการ</option>
+          <option value="owner">เจ้าของ</option>
+        </select>
+      </div>
+      <div id="m-active-wrap" class="hidden">
+        <label>สถานะ</label>
+        <select id="m-active">
+          <option value="1">ใช้งาน</option>
+          <option value="0">ปิดใช้งาน</option>
+        </select>
+      </div>
+    </div>
+    <label id="m-pin-label">ตั้ง PIN (4–6 หลัก)</label>
+    <input id="m-pin" class="pin-input" type="text" inputmode="numeric" placeholder="••••" maxlength="6">
+    <button class="btn" id="m-save" onclick="saveEmp()">บันทึก</button>
+    <button class="btn ghost" onclick="closeModal()">ยกเลิก</button>
+    <div class="msg err" id="m-msg"></div>
+  </div>
+</div>
+
+<!-- ============ MODAL (change own pin) ============ -->
+<div id="pinmodal" class="overlay hidden">
+  <div class="sheet">
+    <h3>เปลี่ยน PIN ของฉัน</h3>
+    <label>PIN เดิม</label>
+    <input id="cp-old" class="pin-input" type="password" inputmode="numeric" placeholder="••••" maxlength="6">
+    <label>PIN ใหม่</label>
+    <input id="cp-new" class="pin-input" type="password" inputmode="numeric" placeholder="••••" maxlength="6">
+    <label>ยืนยัน PIN ใหม่</label>
+    <input id="cp-new2" class="pin-input" type="password" inputmode="numeric" placeholder="••••" maxlength="6">
+    <button class="btn" id="cp-save" onclick="saveChangePin()">บันทึก</button>
+    <button class="btn ghost" onclick="closePinModal()">ยกเลิก</button>
+    <div class="msg" id="cp-msg"></div>
+  </div>
+</div>
+
+<!-- ซ่อนไว้: ใช้สร้างรูปสรุป Stock ส่งเข้า LINE -->
+<div id="st-capture"></div>
+
+<script>
+/* ============ ตั้งค่า 2 ระบบ: ใช้จริง (prod) / ทดลอง (dev) ============
+   ระบบเลือกให้อัตโนมัติจากที่อยู่เว็บ: ถ้า URL มีคำว่า "dev" = ใช้ค่าฝั่ง dev
+   ใส่ URL ทั้งคู่ครั้งเดียว แล้วก๊อปไฟล์นี้ไปวางได้ทั้ง Prod และ Dev โดยไม่ต้องแก้
+   • prod.stock = GAS Stock เดิม (ชีท/Drive/LINE/รายงาน SSS ทำงานต่อปกติ)
+   • dev.stock  = ถ้าเว้น 'PASTE_...' ไว้ ฝั่ง dev จะไม่ส่ง Stock (กันเขียนทับข้อมูลจริง) */
+const ENV = {
+  prod: {
+    api:   'https://script.google.com/macros/s/AKfycbzsyCymuHcXZYqChmiSpCHFnnCbT9BbqKU3xaUTWCgq_1F-zp9AAuVI_-cR1ENiLU0tGg/exec',
+    stock: 'https://script.google.com/macros/s/AKfycby0tNfxuwJVdq7j9WMXvdBbSXWsu4md7tyBHSkceykHg1xbenltdwTE265lO3jui7A6Xg/exec'
+  },
+  dev: {
+    api:   'PASTE_DEV_GAS_URL',
+    stock: 'PASTE_DEV_STOCK_URL'
+  }
+};
+const IS_DEV = /dev/i.test(location.hostname + location.pathname) || location.search.indexOf('dev') >= 0;
+const API_URL  = (IS_DEV ? ENV.dev : ENV.prod).api;
+const SHEET_URL = (IS_DEV ? ENV.dev : ENV.prod).stock;
+/* ================================================== */
+
+const ROLE_TH = {owner:'เจ้าของ', manager:'ผู้จัดการ', staff:'พนักงาน'};
+let ME = null;            // ข้อมูลผู้ใช้ที่ล็อกอินอยู่
+let EMP_CACHE = [];       // รายชื่อพนักงาน (หน้า admin)
+let editingId = null;     // emp_id ที่กำลังแก้ (null = เพิ่มใหม่)
+
+function token(){ return localStorage.getItem('mana_token') || ''; }
+function setToken(t){ t ? localStorage.setItem('mana_token', t) : localStorage.removeItem('mana_token'); }
+
+async function api(action, data){
+  data = data || {};
+  data.action = action;
+  if (action !== 'login') data.token = token();
+  try{
+    const res = await fetch(API_URL, { method:'POST', body: JSON.stringify(data) });
+    return await res.json();
+  }catch(e){
+    return { ok:false, error:'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ — ตรวจอินเทอร์เน็ต/URL' };
+  }
+}
+
+function show(id){
+  ['login','home','stock','clock','report','admin'].forEach(s=>document.getElementById('screen-'+s).classList.add('hidden'));
+  document.getElementById('screen-'+id).classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+function msg(el, text, kind){
+  el.textContent = text;
+  el.className = 'msg show ' + (kind||'err');
+}
+function clearMsg(el){ el.className='msg'; }
+function busy(btn, on, label){
+  if(on){ btn.dataset.txt = btn.textContent; btn.innerHTML='<span class="spinner"></span>'; btn.disabled=true; }
+  else { btn.textContent = btn.dataset.txt || label; btn.disabled=false; }
+}
+
+/* ---------- LOGIN ---------- */
+async function doLogin(){
+  const phone = document.getElementById('li-phone').value.replace(/\D/g,'');
+  const pin = document.getElementById('li-pin').value;
+  const m = document.getElementById('li-msg');
+  clearMsg(m);
+  if(!phone || !pin){ msg(m,'กรุณากรอกเบอร์และ PIN'); return; }
+  const btn = document.getElementById('li-btn'); busy(btn,true);
+  const r = await api('login', {phone, pin});
+  busy(btn,false,'เข้าสู่ระบบ');
+  if(!r.ok){ msg(m, r.error||'เข้าสู่ระบบไม่สำเร็จ'); return; }
+  setToken(r.token);
+  ME = r.emp;
+  document.getElementById('li-pin').value='';
+  enterHome();
+}
+
+function enterHome(){
+  const name = ME.nickname || ME.name || '—';
+  document.getElementById('ho-name').textContent = name;
+  document.getElementById('ho-avatar').textContent = (name[0]||'M').toUpperCase();
+  const chip = document.getElementById('ho-chip');
+  chip.textContent = ROLE_TH[ME.role] || ME.role;
+  chip.className = 'chip ' + ME.role;
+  document.getElementById('ho-admin-sect').classList.toggle('hidden', !ME.is_admin);
+  show('home');
+}
+
+function logout(){
+  setToken('');
+  ME = null;
+  document.getElementById('li-phone').value='';
+  show('login');
+}
+
+/* ---------- MODULE TILES ---------- */
+const STOCK_ITEMS=['Salmon','Maguro','Madai','ShimaAji','Kanpachi','Aori Ika','Hokkigai','Ikura','Hotate'];
+const HOTATE_BOX=30;
+let stockBuilt=false;
+
+function openStock(){
+  if(!stockBuilt){ renderStockCards(); stockBuilt=true; }
+  document.getElementById('st-date').textContent=thaiDateNow();
+  show('stock');
+}
+function thaiDateNow(){
+  const d=new Date(), p=n=>String(n).padStart(2,'0');
+  const days=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+  const months=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  return 'วัน'+days[d.getDay()]+'ที่ '+d.getDate()+' '+months[d.getMonth()]+' '+(d.getFullYear()+543)+' '+p(d.getHours())+':'+p(d.getMinutes());
+}
+function stNi(id){ return '<input id="'+id+'" type="number" inputmode="numeric" min="0" placeholder="0" oninput="calcStockUsed()">'; }
+function renderStockCards(){
+  const box=document.getElementById('st-cards');
+  box.innerHTML=STOCK_ITEMS.map((item,i)=>{
+    if(item==='Hotate'){
+      const pair=pfx=>'<div class="st-hpair">'+stNi(pfx+'_box')+'<span class="st-hu">กล่อง</span>'+stNi(pfx+'_pc')+'<span class="st-hu">ตัว</span></div>';
+      return '<div class="st-card"><div class="st-top"><span class="st-n">🐚 '+item+'</span><span class="st-u" id="used_'+i+'">0 ตัว</span></div>'+
+        '<div class="st-hrow">'+
+          '<div class="st-hf"><label>ของเดิม</label>'+pair('old_'+i)+'</div>'+
+          '<div class="st-hf"><label>ของเข้า</label>'+pair('in_'+i)+'</div>'+
+          '<div class="st-hf"><label>เหลือ</label>'+pair('rem_'+i)+'</div>'+
+        '</div></div>';
+    }
+    return '<div class="st-card"><div class="st-top"><span class="st-n">🐟 '+item+'</span><span class="st-u" id="used_'+i+'">0</span></div>'+
+      '<div class="st-row">'+
+        '<div class="st-f"><label>เดิม</label>'+stNi('old_'+i)+'</div>'+
+        '<div class="st-f"><label>เข้า</label>'+stNi('in_'+i)+'</div>'+
+        '<div class="st-f"><label>แต่ง</label>'+stNi('cut_'+i)+'</div>'+
+        '<div class="st-f"><label>เหลือ</label>'+stNi('rem_'+i)+'</div>'+
+      '</div></div>';
+  }).join('');
+  calcStockUsed();
+}
+function stGv(id){ const el=document.getElementById(id); return el?(parseInt(el.value,10)||0):0; }
+function stRaw(id){ const el=document.getElementById(id); return el?el.value:''; }
+function computeUsed(i){
+  if(STOCK_ITEMS[i]==='Hotate'){
+    const u=(stGv('old_'+i+'_box')*HOTATE_BOX+stGv('old_'+i+'_pc'))
+           +(stGv('in_'+i+'_box')*HOTATE_BOX+stGv('in_'+i+'_pc'))
+           -(stGv('rem_'+i+'_box')*HOTATE_BOX+stGv('rem_'+i+'_pc'));
+    return {num:u, used:u+'ตัว', pill:'ใช้ '+u+' ตัว'};
+  }
+  const u=stGv('old_'+i)+stGv('in_'+i)-stGv('cut_'+i)-stGv('rem_'+i);
+  return {num:u, used:String(u), pill:'ใช้ '+u.toLocaleString('en-US')};
+}
+function calcStockUsed(){
+  STOCK_ITEMS.forEach((item,i)=>{
+    const cell=document.getElementById('used_'+i); if(!cell) return;
+    const c=computeUsed(i);
+    cell.textContent=c.pill; cell.className='st-u'+(c.num<0?' neg':'');
+  });
+}
+function stCell(pfx){
+  const b=document.getElementById(pfx+'_box'), p=document.getElementById(pfx+'_pc');
+  if(b&&p) return b.value+'กล่อง '+p.value+'ตัว';
+  return stRaw(pfx);
+}
+function buildStockCapture(rows,date,note,by){
+  const cap=document.getElementById('st-capture');
+  const tr=rows.map(r=>'<tr><td class="it">'+esc(r.item)+'</td><td>'+esc(r.old||'')+'</td><td>'+esc(r.in||'')+'</td><td>'+esc(r.cut||'')+'</td><td>'+esc(r.rem||'')+'</td><td class="u">'+esc(r.used||'')+'</td></tr>').join('');
+  cap.innerHTML='<div class="cap-h">📦 Stock Daily</div><div class="cap-sub">'+esc(date)+(by?(' · ผู้กรอก: '+esc(by)):'')+'</div>'+
+    '<table class="cap-t"><thead><tr><th>รายการ</th><th>ของเดิม</th><th>ของเข้า</th><th>ตัดแต่ง</th><th>เหลือ</th><th>ใช้ไป</th></tr></thead><tbody>'+tr+'</tbody></table>'+
+    (note?('<div class="cap-note">📝 '+esc(note)+'</div>'):'');
+}
+async function sendStock(){
+  const m=document.getElementById('st-msg'); clearMsg(m);
+  const btn=document.getElementById('st-send');
+  if(String(SHEET_URL).indexOf('PASTE')===0){ msg(m,'โหมดทดลอง: ยังไม่ตั้งปลายทาง Stock — ไม่ได้ส่งข้อมูล (กันเขียนทับ Stock จริง)'); return; }
+  const rows=STOCK_ITEMS.map((item,i)=>({item:item, old:stCell('old_'+i), in:stCell('in_'+i),
+    cut:item==='Hotate'?'':stRaw('cut_'+i), rem:stCell('rem_'+i), used:computeUsed(i).used}));
+  const note=document.getElementById('st-note').value;
+  const date=document.getElementById('st-date').textContent;
+  const by=(ME&&(ME.nickname||ME.name))||'';
+  busy(btn,true);
+  buildStockCapture(rows,date,note,by);
+  try{
+    const canvas=await html2canvas(document.getElementById('st-capture'),{scale:1.4,backgroundColor:'#ffffff',logging:false});
+    const imageBase64=canvas.toDataURL('image/jpeg',0.85).split(',')[1];
+    const noteFull=by?('[ผู้กรอก: '+by+'] '+note):note;
+    await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({date:date,rows:rows,note:noteFull,imageBase64:imageBase64})});
+    busy(btn,false,'ส่งข้อมูล');
+    msg(m,'✅ ส่งข้อมูลเรียบร้อย','ok');
+  }catch(e){ busy(btn,false,'ส่งข้อมูล'); msg(m,'ส่งไม่สำเร็จ: '+(e.message||e)); }
+}
+function comingSoon(name){ alert('“'+name+'” กำลังพัฒนา จะเปิดให้ใช้เร็ว ๆ นี้ครับ'); }
+
+/* ---------- เวลาเข้างาน (เข้า–ออกงาน) ---------- */
+let ME_STATUS = null;
+function tickClock(){
+  const d=new Date(), p=n=>String(n).padStart(2,'0');
+  const cl=document.getElementById('ck-clock'); if(!cl) return;
+  cl.textContent=p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());
+  const days=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+  const months=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  document.getElementById('ck-date').textContent='วัน'+days[d.getDay()]+'ที่ '+d.getDate()+' '+months[d.getMonth()]+' '+(d.getFullYear()+543);
+}
+async function openClock(){ show('clock'); tickClock(); await loadStatus(); }
+async function loadStatus(){
+  const r=await api('attendanceStatus');
+  if(!r.ok){ if(r.error&&r.error.indexOf('เข้าสู่ระบบ')>=0){ logout(); } return; }
+  ME_STATUS=r;
+  document.getElementById('ck-adminwrap').classList.toggle('hidden', !r.is_admin);
+  renderStatus(); loadHistory();
+}
+function renderStatus(){
+  const r=ME_STATUS, inNow=r.status==='in';
+  document.getElementById('ck-status').textContent=inNow?'กำลังทำงาน':'ยังไม่ได้เข้างาน / ออกงานแล้ว';
+  document.getElementById('ck-badge').className='badge '+(inNow?'in':'out');
+  document.getElementById('ck-dot').className='dot '+(inNow?'on':'off');
+  document.getElementById('ck-since').textContent=inNow&&r.since?('ตั้งแต่ '+r.since.slice(0,5)+' น.'):'';
+  const act=document.getElementById('ck-action');
+  act.textContent=inNow?'ออกงาน':'เข้างาน'; act.className='bigbtn '+(inNow?'out':'in');
+  document.getElementById('ck-firstin').textContent=(r.today&&r.today.firstIn)?r.today.firstIn.slice(0,5):'—';
+  document.getElementById('ck-lastout').textContent=(r.today&&r.today.lastOut)?r.today.lastOut.slice(0,5):'—';
+}
+async function loadHistory(){
+  const box=document.getElementById('ck-history');
+  const r=await api('myAttendance');
+  if(!r.ok||!r.records||!r.records.length){ box.innerHTML='<div class="center muted" style="padding:10px">ยังไม่มีประวัติ</div>'; return; }
+  box.innerHTML=r.records.map(x=>`<div class="rec"><span class="${x.type}">${x.type==='in'?'🟢 เข้างาน':'🔴 ออกงาน'}</span><span class="d">${x.date} · ${x.time.slice(0,5)} น.</span></div>`).join('');
+}
+function getLoc(){
+  return new Promise(res=>{
+    if(!navigator.geolocation) return res({});
+    navigator.geolocation.getCurrentPosition(
+      pos=>res({lat:pos.coords.latitude,lng:pos.coords.longitude}), ()=>res({}),
+      {enableHighAccuracy:true,timeout:8000,maximumAge:30000});
+  });
+}
+async function punch(){
+  const inNow=ME_STATUS&&ME_STATUS.status==='in';
+  const btn=document.getElementById('ck-action'), m=document.getElementById('ck-msg'); clearMsg(m);
+  const geo=document.getElementById('ck-geo'); geo.textContent='กำลังตรวจตำแหน่ง…';
+  busy(btn,true);
+  const loc=await getLoc();
+  geo.textContent=loc.lat?('📍 '+loc.lat.toFixed(4)+', '+loc.lng.toFixed(4)):'📍 ไม่ได้ตำแหน่ง';
+  const r=await api(inNow?'clockOut':'clockIn',{lat:loc.lat,lng:loc.lng,clientTime:new Date().toLocaleString('th-TH')});
+  busy(btn,false,'');
+  if(!r.ok){ msg(m,r.error||'บันทึกไม่สำเร็จ'); renderStatus(); return; }
+  msg(m,(r.type==='in'?'✅ เข้างานเรียบร้อย ':'✅ ออกงานเรียบร้อย ')+r.time.slice(0,5)+' น.','ok');
+  await loadStatus();
+}
+async function openReport(){
+  show('report');
+  const box=document.getElementById('rp-list'); box.innerHTML='<div class="center muted" style="padding:20px"><span class="spinner"></span></div>';
+  const r=await api('attendanceReport');
+  if(!r.ok){ box.innerHTML='<div class="card center">'+(r.error||'โหลดไม่สำเร็จ')+'</div>'; return; }
+  document.getElementById('rp-date').textContent='วันที่ '+r.date;
+  if(!r.employees.length){ box.innerHTML='<div class="card center muted">ยังไม่มีใครลงเวลาวันนี้</div>'; return; }
+  box.innerHTML=r.employees.map(e=>`<div class="card" style="padding:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center"><b>${esc(e.name)}</b>
+      <span class="muted" style="font-size:13px">${e.still_in?'🟢 อยู่ในร้าน':(e.worked?('รวม '+e.worked):'')}</span></div>
+    <div class="muted" style="font-size:14px;margin-top:6px">เข้า ${e.firstIn?e.firstIn.slice(0,5):'—'} · ออก ${e.lastOut?e.lastOut.slice(0,5):'—'} · ${e.punches.length} ครั้ง</div>
+  </div>`).join('');
+}
+
+/* ---------- ADMIN: list ---------- */
+async function openAdmin(){
+  show('admin');
+  const box = document.getElementById('emp-list');
+  box.innerHTML = '<div class="center muted" style="padding:30px 0"><span class="spinner"></span></div>';
+  const r = await api('listEmployees');
+  if(!r.ok){ box.innerHTML = '<div class="card center">'+(r.error||'โหลดไม่สำเร็จ')+'</div>'; return; }
+  EMP_CACHE = r.employees;
+  renderEmployees();
+}
+
+function renderEmployees(){
+  const box = document.getElementById('emp-list');
+  if(!EMP_CACHE.length){ box.innerHTML = '<div class="card center muted">ยังไม่มีพนักงาน</div>'; return; }
+  // เรียง: admin ก่อน แล้วตามชื่อ
+  const order = {owner:0, manager:1, staff:2};
+  const list = EMP_CACHE.slice().sort((a,b)=> (order[a.role]-order[b.role]) || String(a.name).localeCompare(String(b.name),'th'));
+  box.innerHTML = list.map(e=>{
+    const nm = e.nickname ? (e.nickname+' · '+e.name) : e.name;
+    return `<div class="emp">
+      <div class="top">
+        <div>
+          <div class="nm">${esc(nm)}</div>
+          <div class="meta">📱 ${esc(fmtPhone(e.phone))}</div>
+          <div class="meta"><span class="dot ${e.active?'on':'off'}"></span>${e.active?'ใช้งาน':'ปิดใช้งาน'}</div>
+        </div>
+        <span class="chip ${e.role}">${ROLE_TH[e.role]||e.role}</span>
+      </div>
+      <div class="acts">
+        <button class="btn ghost sm" onclick='openEmpModal(${JSON.stringify(e.emp_id)})'>แก้ไข</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- ADMIN: add/edit modal ---------- */
+function openEmpModal(id){
+  editingId = id || null;
+  const e = id ? EMP_CACHE.find(x=>x.emp_id===id) : null;
+  document.getElementById('m-title').textContent = e ? 'แก้ไขพนักงาน' : 'เพิ่มพนักงาน';
+  document.getElementById('m-hint').textContent = e ? ('รหัส '+e.emp_id) : 'กรอกข้อมูลพนักงานใหม่';
+  document.getElementById('m-name').value  = e ? (e.name||'') : '';
+  document.getElementById('m-nick').value  = e ? (e.nickname||'') : '';
+  document.getElementById('m-phone').value = e ? fmtPhone(e.phone) : '';
+  document.getElementById('m-role').value  = e ? e.role : 'staff';
+  document.getElementById('m-active').value = e ? (e.active?'1':'0') : '1';
+  document.getElementById('m-active-wrap').classList.toggle('hidden', !e);
+  document.getElementById('m-pin').value = '';
+  document.getElementById('m-pin-label').textContent = e ? 'รีเซ็ต PIN (เว้นว่าง = ไม่เปลี่ยน)' : 'ตั้ง PIN (4–6 หลัก)';
+  document.getElementById('m-phone').disabled = !!e;  // ไม่ให้แก้เบอร์ตอนแก้ไข (เป็นตัวระบุตัวตน)
+  clearMsg(document.getElementById('m-msg'));
+  document.getElementById('modal').classList.remove('hidden');
+}
+function closeModal(){ document.getElementById('modal').classList.add('hidden'); }
+
+async function saveEmp(){
+  const m = document.getElementById('m-msg'); clearMsg(m);
+  const name  = document.getElementById('m-name').value.trim();
+  const nick  = document.getElementById('m-nick').value.trim();
+  const phone = document.getElementById('m-phone').value.replace(/\D/g,'');
+  const role  = document.getElementById('m-role').value;
+  const pin   = document.getElementById('m-pin').value.trim();
+  const btn = document.getElementById('m-save');
+
+  if(!name){ msg(m,'กรุณากรอกชื่อ'); return; }
+  let r;
+  busy(btn,true);
+  if(editingId){
+    const active = document.getElementById('m-active').value;
+    const payload = {emp_id:editingId, name, nickname:nick, role, active:active==='1'};
+    if(pin) payload.newPin = pin;
+    r = await api('updateEmployee', payload);
+  }else{
+    if(phone.length<9){ busy(btn,false,'บันทึก'); msg(m,'เบอร์ไม่ถูกต้อง'); return; }
+    if(pin.length<4){ busy(btn,false,'บันทึก'); msg(m,'PIN ต้องอย่างน้อย 4 หลัก'); return; }
+    r = await api('addEmployee', {name, nickname:nick, phone, role, pin});
+  }
+  busy(btn,false,'บันทึก');
+  if(!r.ok){ msg(m, r.error||'บันทึกไม่สำเร็จ'); return; }
+  closeModal();
+  openAdmin();
+}
+
+/* ---------- CHANGE OWN PIN ---------- */
+function openChangePin(){
+  ['cp-old','cp-new','cp-new2'].forEach(id=>document.getElementById(id).value='');
+  clearMsg(document.getElementById('cp-msg'));
+  document.getElementById('pinmodal').classList.remove('hidden');
+}
+function closePinModal(){ document.getElementById('pinmodal').classList.add('hidden'); }
+
+async function saveChangePin(){
+  const m = document.getElementById('cp-msg'); clearMsg(m);
+  const oldPin = document.getElementById('cp-old').value;
+  const newPin = document.getElementById('cp-new').value;
+  const new2   = document.getElementById('cp-new2').value;
+  if(newPin.length<4){ msg(m,'PIN ใหม่ต้องอย่างน้อย 4 หลัก'); return; }
+  if(newPin!==new2){ msg(m,'PIN ใหม่ทั้งสองช่องไม่ตรงกัน'); return; }
+  const btn = document.getElementById('cp-save'); busy(btn,true);
+  const r = await api('changePin', {oldPin, newPin});
+  busy(btn,false,'บันทึก');
+  if(!r.ok){ msg(m, r.error||'เปลี่ยนไม่สำเร็จ'); return; }
+  msg(m,'เปลี่ยน PIN เรียบร้อย ✓','ok');
+  setTimeout(closePinModal, 900);
+}
+
+/* ---------- helpers ---------- */
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmtPhone(p){
+  p = String(p||'').replace(/\D/g,'');
+  return p.length===10 ? p.replace(/(\d{3})(\d{3})(\d{4})/,'$1-$2-$3') : p;
+}
+
+/* ---------- boot: auto-login ด้วยโทเค็นเดิม ---------- */
+(async function(){
+  if(API_URL.indexOf('PASTE') === 0){ show('login'); return; }
+  if(!token()){ show('login'); return; }
+  const r = await api('me');
+  if(r.ok){ ME = r.emp; enterHome(); }
+  else { setToken(''); show('login'); }
+})();
+
+// กด Enter ที่ช่อง PIN = ล็อกอิน
+document.getElementById('li-pin').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+setInterval(tickClock, 1000);  // นาฬิกาสดในหน้าเวลาเข้างาน
+if(IS_DEV){ var _devb=document.createElement('div'); _devb.textContent='⚙ ทดลอง DEV';
+  _devb.style.cssText='position:fixed;left:10px;bottom:10px;z-index:200;background:#e3b23c;color:#3a2a00;font-weight:800;font-size:12px;padding:6px 12px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.35)';
+  document.body.appendChild(_devb); }
+</script>
+</body>
+</html>
