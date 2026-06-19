@@ -551,6 +551,7 @@ const STOCK_GROUPS=[
     'Salmon','Maguro','Madai','ShimaAji','Kanpachi','Aori Ika','Hokkigai','Ikura',{n:'Hotate',hotate:true}
   ]},
   {name:'เครื่องดื่ม', icon:'🥤', count:true, items:[
+    // 🍺 เบียร์
     {n:'เบียร์สดสิงห์',u:'ถัง',img:'singha-draft',e:'🍺',sub:'เบียร์'},
     {n:'เบียร์สิงห์ขวด 620ml',u:'ขวด',img:'singha-620',e:'🍺',sub:'เบียร์'},
     {n:'Sapporo เบียร์สด 20L',u:'ถัง',img:'sapporo-draft',e:'🍺',sub:'เบียร์'},
@@ -562,28 +563,34 @@ const STOCK_GROUPS=[
     {n:'Erdinger Weissbier',u:'ขวด',img:'erdinger-weissbier',e:'🍺',sub:'เบียร์'},
     {n:'Erdinger Dunkel',u:'ขวด',img:'erdinger-dunkel',e:'🍺',sub:'เบียร์'},
     {n:'Vana Pomegranate',u:'ขวด',img:'vana-pomegranate',e:'🍺',sub:'เบียร์'},
+    // 🥃 วิสกี้ (รวมบรั่นดี Regency ตามเมนู)
+    {n:'Kakubin 700ml',u:'ขวด',img:'kakubin',e:'🥃',sub:'วิสกี้'},
+    {n:'Regency บรั่นดี',u:'ขวด',img:'regency',e:'🥃',sub:'วิสกี้'},
+    // 🍑 อุเมะชุ / ยูซุ
+    {n:'Kotsuzumi Plumtonic 1500ml',u:'ขวด',img:'kotsuzumi-plumtonic',e:'🍑',sub:'อุเมะชุ / ยูซุ'},
+    {n:'Shio Yuzu 720ml',u:'ขวด',img:'shio-yuzu-720',e:'🍋',sub:'อุเมะชุ / ยูซุ'},
+    {n:'Shio Yuzu 1800ml',u:'ขวด',img:'shio-yuzu-1800',e:'🍋',sub:'อุเมะชุ / ยูซุ'},
+    // 🥤 ซอฟต์ดริงก์ (น้ำ/โซดา/โค้ก/ชา/น้ำแข็ง)
+    {n:'โซดาสิงห์ 400cc',u:'ขวด',img:'singha-soda',e:'🫧',sub:'ซอฟต์ดริงก์'},
+    {n:'สิงห์ น้ำดื่ม 600ml',u:'ขวด',img:'singha-water',e:'💧',sub:'ซอฟต์ดริงก์'},
+    {n:'โค้ก',u:'กระป๋อง',img:'coke',e:'🥤',sub:'ซอฟต์ดริงก์'},
+    {n:'โค้ก Zero',u:'กระป๋อง',img:'coke-zero',e:'🥤',sub:'ซอฟต์ดริงก์'},
+    {n:'Oolong Tea 500ml',u:'ขวด',img:'oolong-tea',e:'🍵',sub:'ซอฟต์ดริงก์'},
+    {n:'น้ำแข็ง',u:'ถุง',img:'ice',e:'🧊',sub:'ซอฟต์ดริงก์'},
+    // 🍶 โชจู
+    {n:'Kuro Kirishima 900ml',u:'ขวด',img:'kuro-kirishima',e:'🍶',sub:'โชจู'},
+    {n:'Mitake 900ml',u:'ขวด',img:'mitake',e:'🍶',sub:'โชจู'},
+    // 🍶 สาเก
     {n:'Inata Hime 300ml',u:'ขวด',img:'inata-hime',e:'🍶',sub:'สาเก'},
     {n:'Born Junsui 300ml',u:'ขวด',img:'born-junsui',e:'🍶',sub:'สาเก'},
     {n:'Hanzo Karakuchi 300ml',u:'ขวด',img:'hanzo-karakuchi',e:'🍶',sub:'สาเก'},
-    {n:'Mitake 900ml',u:'ขวด',img:'mitake',e:'🍶',sub:'สาเก'},
-    {n:'Kuro Kirishima 900ml',u:'ขวด',img:'kuro-kirishima',e:'🥃',sub:'โชจู / วิสกี้ / บรั่นดี'},
-    {n:'Kakubin 700ml',u:'ขวด',img:'kakubin',e:'🥃',sub:'โชจู / วิสกี้ / บรั่นดี'},
-    {n:'Regency บรั่นดี',u:'ขวด',img:'regency',e:'🥃',sub:'โชจู / วิสกี้ / บรั่นดี'},
-    {n:'Kotsuzumi Plumtonic 1500ml',u:'ขวด',img:'kotsuzumi-plumtonic',e:'🍶',sub:'อุเมะชุ / ยูซุ'},
-    {n:'Shio Yuzu 720ml',u:'ขวด',img:'shio-yuzu-720',e:'🍶',sub:'อุเมะชุ / ยูซุ'},
-    {n:'Shio Yuzu 1800ml',u:'ขวด',img:'shio-yuzu-1800',e:'🍶',sub:'อุเมะชุ / ยูซุ'},
+    // 🍷 ไวน์ (ไม่อยู่ในเมนูเครื่องดื่ม แต่มีสต็อก)
     {n:'Sauvignon Blanc',u:'ขวด',img:'sauvignon-blanc',e:'🍷',sub:'ไวน์'},
     {n:'Bordeaux',u:'ขวด',img:'bordeaux',e:'🍷',sub:'ไวน์'},
     {n:'Brut (สปาร์กลิง)',u:'ขวด',img:'brut',e:'🍾',sub:'ไวน์'},
     {n:'Chianti',u:'ขวด',img:'chianti',e:'🍷',sub:'ไวน์'},
     {n:'Soave',u:'ขวด',img:'soave',e:'🍷',sub:'ไวน์'},
-    {n:'Chardonnay',u:'ขวด',img:'chardonnay',e:'🍷',sub:'ไวน์'},
-    {n:'โซดาสิงห์ 400cc',u:'ขวด',img:'singha-soda',e:'🫧',sub:'น้ำ / ซอฟต์ดริงก์ / ชา / น้ำแข็ง'},
-    {n:'Oolong Tea 500ml',u:'ขวด',img:'oolong-tea',e:'🍵',sub:'น้ำ / ซอฟต์ดริงก์ / ชา / น้ำแข็ง'},
-    {n:'สิงห์ น้ำดื่ม 600ml',u:'ขวด',img:'singha-water',e:'💧',sub:'น้ำ / ซอฟต์ดริงก์ / ชา / น้ำแข็ง'},
-    {n:'โค้ก',u:'กระป๋อง',img:'coke',e:'🥤',sub:'น้ำ / ซอฟต์ดริงก์ / ชา / น้ำแข็ง'},
-    {n:'โค้ก Zero',u:'กระป๋อง',img:'coke-zero',e:'🥤',sub:'น้ำ / ซอฟต์ดริงก์ / ชา / น้ำแข็ง'},
-    {n:'น้ำแข็ง',u:'ถุง',img:'ice',e:'🧊',sub:'น้ำ / ซอฟต์ดริงก์ / ชา / น้ำแข็ง'}
+    {n:'Chardonnay',u:'ขวด',img:'chardonnay',e:'🍷',sub:'ไวน์'}
   ]},
   {name:'ผัก', icon:'🥬', cut:false, items:[]},
   {name:'เนื้อสัตว์', icon:'🥩', cut:false, items:[]}
@@ -600,13 +607,14 @@ STOCK_GROUPS.forEach(function(g){ g.items.forEach(function(it){
   var o=(typeof it==='object')?it:{};
   STOCK_FLAT.push({name:nm, unit:o.u||'', hotate:!!o.hotate||nm==='Hotate', cut:!!g.cut, count:!!g.count, img:o.img||'', e:o.e||g.icon});
 }); });
-const DRINK_SUBS=[   // กลุ่มย่อยของเครื่องดื่ม (ลำดับ+ไอคอนหัวกลุ่ม) — แตะเพื่อกาง
+const DRINK_SUBS=[   // กลุ่มย่อยตามเมนูเครื่องดื่มของร้าน (Beer→Whisky→Umeshu/Yuzu→Soft→Shochu→Sake) + ไวน์
   {name:'เบียร์',icon:'🍺'},
+  {name:'วิสกี้',icon:'🥃'},
+  {name:'อุเมะชุ / ยูซุ',icon:'🍑'},
+  {name:'ซอฟต์ดริงก์',icon:'🥤'},
+  {name:'โชจู',icon:'🍶'},
   {name:'สาเก',icon:'🍶'},
-  {name:'โชจู / วิสกี้ / บรั่นดี',icon:'🥃'},
-  {name:'อุเมะชุ / ยูซุ',icon:'🍵'},
-  {name:'ไวน์',icon:'🍷'},
-  {name:'น้ำ / ซอฟต์ดริงก์ / ชา / น้ำแข็ง',icon:'🥤'}
+  {name:'ไวน์',icon:'🍷'}
 ];
 
 function groupStart(gi){ var s=0; for(var k=0;k<gi;k++) s+=STOCK_GROUPS[k].items.length; return s; }
