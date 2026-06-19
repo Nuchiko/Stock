@@ -118,6 +118,16 @@
 
   /* Stock form (แบบ B — แถวกะทัดรัด) */
   .st-tip{font-size:12px;color:var(--muted);margin:6px 2px 14px}
+  .st-group{font-weight:800;font-size:15px;color:#fff;margin:20px 2px 9px;display:flex;align-items:center;gap:7px}
+  .st-empty{font-size:13px;color:rgba(255,255,255,.55);padding:4px 4px 6px}
+  .stcat-btn{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--card);
+    border:1px solid var(--line);border-radius:14px;padding:18px 16px;margin-bottom:12px;cursor:pointer;
+    box-shadow:0 8px 24px rgba(3,18,50,.18);transition:transform .08s}
+  .stcat-btn:active{transform:scale(.99)}
+  .stcat-btn .ico{font-size:30px;line-height:1}
+  .stcat-btn .nm{font-weight:800;font-size:18px}
+  .stcat-btn .ct{font-size:13px;color:var(--muted);margin-top:2px}
+  .stcat-btn .arrow{margin-left:auto;color:var(--accent2);font-size:24px;font-weight:700}
   .st-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:9px}
   .st-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px}
   .st-n{font-weight:800;font-size:16px}
@@ -302,17 +312,28 @@
     <div id="emp-list"><div class="center muted" style="padding:30px 0"><span class="spinner"></span></div></div>
   </section>
 
-  <!-- ============ STOCK (ฟอร์มใหม่ กรอกง่าย) ============ -->
+  <!-- ============ STOCK (เมนูเลือกหมวด) ============ -->
   <section id="screen-stock" class="hidden">
     <button class="backbtn" onclick="show('home')">‹ กลับหน้าหลัก</button>
     <div class="topbar" style="padding-top:0"><div class="who">📦 Stock ประจำวัน</div></div>
     <div class="muted" id="st-date" style="margin:-6px 2px 2px">—</div>
+    <div class="st-tip">เลือกหมวดที่จะกรอก</div>
+    <div id="st-cats"></div>
+  </section>
+
+  <!-- ============ STOCK (กรอกตามหมวด) ============ -->
+  <section id="screen-stockcat" class="hidden">
+    <button class="backbtn" onclick="openStock()">‹ กลับเลือกหมวด</button>
+    <div class="topbar" style="padding-top:0"><div class="who" id="stc-title">หมวด</div></div>
+    <div class="muted" id="stc-date" style="margin:-6px 2px 2px">—</div>
     <div class="st-tip">กรอกเป็นกรัม · ช่อง “ใช้ไป” คำนวณให้อัตโนมัติ</div>
-    <div id="st-cards"></div>
-    <label class="page-label" style="margin-top:8px">📝 หมายเหตุ</label>
-    <textarea id="st-note" rows="3" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
-    <button class="btn" id="st-send" onclick="sendStock()">ส่งข้อมูล</button>
-    <div class="msg" id="st-msg"></div>
+    <div id="stc-cards"></div>
+    <div id="stc-form">
+      <label class="page-label" style="margin-top:8px">📝 หมายเหตุ</label>
+      <textarea id="stc-note" rows="3" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea>
+      <button class="btn" id="stc-send" onclick="sendStockCat()">ส่งข้อมูล</button>
+      <div class="msg" id="stc-msg"></div>
+    </div>
     <div class="footnote">บันทึกลงชีท + ส่งรูปเข้า LINE กลุ่ม Staff</div>
   </section>
 
@@ -446,7 +467,7 @@ async function api(action, data){
 }
 
 function show(id){
-  ['login','home','stock','clock','report','admin'].forEach(s=>document.getElementById('screen-'+s).classList.add('hidden'));
+  ['login','home','stock','stockcat','clock','report','admin'].forEach(s=>document.getElementById('screen-'+s).classList.add('hidden'));
   document.getElementById('screen-'+id).classList.remove('hidden');
   window.scrollTo(0,0);
 }
@@ -496,14 +517,42 @@ function logout(){
 }
 
 /* ---------- MODULE TILES ---------- */
-const STOCK_ITEMS=['Salmon','Maguro','Madai','ShimaAji','Kanpachi','Aori Ika','Hokkigai','Ikura','Hotate'];
+const STOCK_GROUPS=[
+  {name:'ปลาดิบ',     icon:'🐟', items:['Salmon','Maguro','Madai','ShimaAji','Kanpachi','Aori Ika','Hokkigai','Ikura','Hotate']},
+  {name:'เครื่องดื่ม', icon:'🥤', items:[]},
+  {name:'ผัก',        icon:'🥬', items:[]},
+  {name:'เนื้อสัตว์',  icon:'🥩', items:[]}
+];
+const STOCK_ITEMS=STOCK_GROUPS.reduce(function(a,g){ return a.concat(g.items); },[]);
 const HOTATE_BOX=30;
-let stockBuilt=false;
+let stCurrentGroup=0;
 
-function openStock(){
-  if(!stockBuilt){ renderStockCards(); stockBuilt=true; }
+function groupStart(gi){ var s=0; for(var k=0;k<gi;k++) s+=STOCK_GROUPS[k].items.length; return s; }
+function openStock(){   // หน้าเลือกหมวด (4 ปุ่ม)
+  document.getElementById('st-cats').innerHTML=STOCK_GROUPS.map(function(g,gi){
+    var ct=g.items.length ? (g.items.length+' รายการ') : 'ยังไม่มีรายการ';
+    return '<div class="stcat-btn" onclick="openStockCat('+gi+')"><span class="ico">'+g.icon+'</span>'+
+      '<div><div class="nm">'+g.name+'</div><div class="ct">'+ct+'</div></div><span class="arrow">›</span></div>';
+  }).join('');
   document.getElementById('st-date').textContent=thaiDateNow();
   show('stock');
+}
+function openStockCat(gi){   // เข้าไปกรอกหมวดที่เลือก
+  stCurrentGroup=gi;
+  var g=STOCK_GROUPS[gi], start=groupStart(gi), form=document.getElementById('stc-form');
+  document.getElementById('stc-title').textContent=g.icon+' '+g.name;
+  document.getElementById('stc-date').textContent=thaiDateNow();
+  if(!g.items.length){
+    document.getElementById('stc-cards').innerHTML='<div class="st-empty">ยังไม่มีรายการในหมวดนี้ — เดี๋ยวเพิ่มทีหลัง</div>';
+    form.style.display='none';
+  }else{
+    document.getElementById('stc-cards').innerHTML=g.items.map(function(item,k){ return stItemCard(item,start+k,g.icon); }).join('');
+    form.style.display='';
+    document.getElementById('stc-note').value='';
+    clearMsg(document.getElementById('stc-msg'));
+    calcStockUsed();
+  }
+  show('stockcat');
 }
 function thaiDateNow(){
   const d=new Date(), p=n=>String(n).padStart(2,'0');
@@ -512,28 +561,25 @@ function thaiDateNow(){
   return 'วัน'+days[d.getDay()]+'ที่ '+d.getDate()+' '+months[d.getMonth()]+' '+(d.getFullYear()+543)+' '+p(d.getHours())+':'+p(d.getMinutes());
 }
 function stNi(id){ return '<input id="'+id+'" type="number" inputmode="numeric" min="0" placeholder="0" oninput="calcStockUsed()">'; }
-function renderStockCards(){
-  const box=document.getElementById('st-cards');
-  box.innerHTML=STOCK_ITEMS.map((item,i)=>{
-    if(item==='Hotate'){
-      const pair=pfx=>'<div class="st-hpair">'+stNi(pfx+'_box')+'<span class="st-hu">กล่อง</span>'+stNi(pfx+'_pc')+'<span class="st-hu">ตัว</span></div>';
-      return '<div class="st-card"><div class="st-top"><span class="st-n">🐚 '+item+'</span><span class="st-u" id="used_'+i+'">0 ตัว</span></div>'+
-        '<div class="st-hrow">'+
-          '<div class="st-hf"><label>ของเดิม</label>'+pair('old_'+i)+'</div>'+
-          '<div class="st-hf"><label>ของเข้า</label>'+pair('in_'+i)+'</div>'+
-          '<div class="st-hf"><label>เหลือ</label>'+pair('rem_'+i)+'</div>'+
-        '</div></div>';
-    }
-    return '<div class="st-card"><div class="st-top"><span class="st-n">🐟 '+item+'</span><span class="st-u" id="used_'+i+'">0</span></div>'+
-      '<div class="st-row">'+
-        '<div class="st-f"><label>เดิม</label>'+stNi('old_'+i)+'</div>'+
-        '<div class="st-f"><label>เข้า</label>'+stNi('in_'+i)+'</div>'+
-        '<div class="st-f"><label>แต่ง</label>'+stNi('cut_'+i)+'</div>'+
-        '<div class="st-f"><label>เหลือ</label>'+stNi('rem_'+i)+'</div>'+
+function stItemCard(item,i,icon){
+  if(item==='Hotate'){
+    const pair=pfx=>'<div class="st-hpair">'+stNi(pfx+'_box')+'<span class="st-hu">กล่อง</span>'+stNi(pfx+'_pc')+'<span class="st-hu">ตัว</span></div>';
+    return '<div class="st-card"><div class="st-top"><span class="st-n">🐚 '+item+'</span><span class="st-u" id="used_'+i+'">0 ตัว</span></div>'+
+      '<div class="st-hrow">'+
+        '<div class="st-hf"><label>ของเดิม</label>'+pair('old_'+i)+'</div>'+
+        '<div class="st-hf"><label>ของเข้า</label>'+pair('in_'+i)+'</div>'+
+        '<div class="st-hf"><label>เหลือ</label>'+pair('rem_'+i)+'</div>'+
       '</div></div>';
-  }).join('');
-  calcStockUsed();
+  }
+  return '<div class="st-card"><div class="st-top"><span class="st-n">'+icon+' '+item+'</span><span class="st-u" id="used_'+i+'">0</span></div>'+
+    '<div class="st-row">'+
+      '<div class="st-f"><label>เดิม</label>'+stNi('old_'+i)+'</div>'+
+      '<div class="st-f"><label>เข้า</label>'+stNi('in_'+i)+'</div>'+
+      '<div class="st-f"><label>แต่ง</label>'+stNi('cut_'+i)+'</div>'+
+      '<div class="st-f"><label>เหลือ</label>'+stNi('rem_'+i)+'</div>'+
+    '</div></div>';
 }
+// (renderStockCards เดิม — รวมทุกหมวดหน้าเดียว — เลิกใช้ แยกหน้าตามหมวดใน openStockCat/sendStockCat แทน)
 function stGv(id){ const el=document.getElementById(id); return el?(parseInt(el.value,10)||0):0; }
 function stRaw(id){ const el=document.getElementById(id); return el?el.value:''; }
 function computeUsed(i){
@@ -558,31 +604,32 @@ function stCell(pfx){
   if(b&&p) return b.value+'กล่อง '+p.value+'ตัว';
   return stRaw(pfx);
 }
-function buildStockCapture(rows,date,note,by){
+function buildStockCapture(rows,date,note,by,cat){
   const cap=document.getElementById('st-capture');
   const tr=rows.map(r=>'<tr><td class="it">'+esc(r.item)+'</td><td>'+esc(r.old||'')+'</td><td>'+esc(r.in||'')+'</td><td>'+esc(r.cut||'')+'</td><td>'+esc(r.rem||'')+'</td><td class="u">'+esc(r.used||'')+'</td></tr>').join('');
-  cap.innerHTML='<div class="cap-h">📦 Stock Daily</div><div class="cap-sub">'+esc(date)+(by?(' · ผู้กรอก: '+esc(by)):'')+'</div>'+
+  cap.innerHTML='<div class="cap-h">📦 Stock'+(cat?(' — '+esc(cat)):'')+'</div><div class="cap-sub">'+esc(date)+(by?(' · ผู้กรอก: '+esc(by)):'')+'</div>'+
     '<table class="cap-t"><thead><tr><th>รายการ</th><th>ของเดิม</th><th>ของเข้า</th><th>ตัดแต่ง</th><th>เหลือ</th><th>ใช้ไป</th></tr></thead><tbody>'+tr+'</tbody></table>'+
     (note?('<div class="cap-note">📝 '+esc(note)+'</div>'):'');
 }
-async function sendStock(){
-  const m=document.getElementById('st-msg'); clearMsg(m);
-  const btn=document.getElementById('st-send');
+async function sendStockCat(){
+  const m=document.getElementById('stc-msg'); clearMsg(m);
+  const btn=document.getElementById('stc-send');
   if(String(SHEET_URL).indexOf('PASTE')===0){ msg(m,'โหมดทดลอง: ยังไม่ตั้งปลายทาง Stock — ไม่ได้ส่งข้อมูล (กันเขียนทับ Stock จริง)'); return; }
-  const rows=STOCK_ITEMS.map((item,i)=>({item:item, old:stCell('old_'+i), in:stCell('in_'+i),
-    cut:item==='Hotate'?'':stRaw('cut_'+i), rem:stCell('rem_'+i), used:computeUsed(i).used}));
-  const note=document.getElementById('st-note').value;
-  const date=document.getElementById('st-date').textContent;
+  const g=STOCK_GROUPS[stCurrentGroup], start=groupStart(stCurrentGroup);
+  const rows=g.items.map(function(item,k){ var i=start+k; return {item:item, old:stCell('old_'+i), in:stCell('in_'+i),
+    cut:item==='Hotate'?'':stRaw('cut_'+i), rem:stCell('rem_'+i), used:computeUsed(i).used}; });
+  const note=document.getElementById('stc-note').value;
+  const date=document.getElementById('stc-date').textContent;
   const by=(ME&&(ME.nickname||ME.name))||'';
   busy(btn,true);
-  buildStockCapture(rows,date,note,by);
+  buildStockCapture(rows,date,note,by,g.name);
   try{
     const canvas=await html2canvas(document.getElementById('st-capture'),{scale:1.4,backgroundColor:'#ffffff',logging:false});
     const imageBase64=canvas.toDataURL('image/jpeg',0.85).split(',')[1];
-    const noteFull=by?('[ผู้กรอก: '+by+'] '+note):note;
+    const noteFull='['+g.name+'] '+(by?('ผู้กรอก '+by+' · '):'')+note;
     await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({date:date,rows:rows,note:noteFull,imageBase64:imageBase64})});
     busy(btn,false,'ส่งข้อมูล');
-    msg(m,'✅ ส่งข้อมูลเรียบร้อย','ok');
+    msg(m,'✅ ส่ง '+g.name+' เรียบร้อย','ok');
   }catch(e){ busy(btn,false,'ส่งข้อมูล'); msg(m,'ส่งไม่สำเร็จ: '+(e.message||e)); }
 }
 function comingSoon(name){ alert('“'+name+'” กำลังพัฒนา จะเปิดให้ใช้เร็ว ๆ นี้ครับ'); }
