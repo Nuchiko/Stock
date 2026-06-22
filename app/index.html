@@ -287,7 +287,7 @@
       <button class="btn" id="li-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
       <div class="msg err" id="li-msg"></div>
     </div>
-    <button class="btn ghost" style="margin-top:14px" onclick="openRegister()">ลงทะเบียนพนักงานใหม่</button>
+    <button class="btn ghost adminbtn" style="margin-top:14px" onclick="openRegister()">ลงทะเบียนพนักงานใหม่</button>
     <div class="footnote">ลืม PIN? แจ้งเจ้าของ/ผู้จัดการให้รีเซ็ตให้</div>
   </section>
 
@@ -349,6 +349,10 @@
       <div class="tile" onclick="openStock()" style="grid-column:1/-1">
         <div class="ico">📦</div>
         <div><div class="tname">Stock</div><div class="tdesc">กรอกสต็อกประจำวัน</div></div>
+      </div>
+      <div class="tile hidden" id="ho-cash-tile" onclick="openCash()" style="grid-column:1/-1">
+        <div class="ico">💵</div>
+        <div><div class="tname">เงินสด</div><div class="tdesc">บันทึกเงินสดรายวัน · ทีม Service</div></div>
       </div>
     </div>
 
@@ -435,6 +439,42 @@
     <div class="topbar" style="padding-top:0"><div class="who">เวลาเข้างานวันนี้</div></div>
     <div id="rp-date" class="muted" style="margin-bottom:10px"></div>
     <div id="rp-list"></div>
+  </section>
+
+  <!-- ============ เงินสด (ทีม Service + ผู้ดูแล) ============ -->
+  <section id="screen-cash" class="hidden">
+    <button class="backbtn" onclick="show('home')">‹ กลับหน้าหลัก</button>
+    <div class="topbar" style="padding-top:0"><div class="who">💵 บันทึกเงินสด</div></div>
+    <div class="page-label" id="cash-datelabel" style="margin:-6px 2px 8px;font-size:14px">—</div>
+    <div class="card">
+      <label>วันที่</label>
+      <input id="cash-date" type="date">
+      <label>ยอดขายเงินสด (บาท)</label>
+      <input id="cash-sales" type="number" inputmode="decimal" min="0" placeholder="0" oninput="cashCalc()">
+      <label>รายการจ่ายออก</label>
+      <div id="cash-payouts"></div>
+      <button class="btn ghost sm" type="button" onclick="cashAddLine()" style="margin-top:8px">+ เพิ่มรายการจ่าย</button>
+      <div class="row2" style="margin-top:4px">
+        <div>
+          <label>เบิก (บาท)</label>
+          <input id="cash-withdraw" type="number" inputmode="decimal" min="0" placeholder="0" oninput="cashCalc()">
+        </div>
+        <div>
+          <label>เงินสดคงเหลือ (บาท)</label>
+          <input id="cash-cash" type="number" inputmode="decimal" min="0" placeholder="0" oninput="cashCalc()">
+        </div>
+      </div>
+      <div class="card" style="margin:14px 0 0;padding:14px;background:var(--bg2)">
+        <div style="display:flex;justify-content:space-between"><span class="muted">รวมจ่ายออก</span><b id="cash-ptotal">0</b></div>
+        <div style="display:flex;justify-content:space-between;margin-top:7px"><span class="muted">สุทธิ (ขาย − จ่าย − เบิก)</span><b id="cash-net">0</b></div>
+      </div>
+      <label style="margin-top:14px">หมายเหตุ</label>
+      <textarea id="cash-note" rows="2" placeholder="(ถ้ามี)"></textarea>
+      <button class="btn" id="cash-send" onclick="sendCash()">บันทึกเงินสด</button>
+      <div class="msg" id="cash-msg"></div>
+    </div>
+    <div class="sect-title">บันทึกล่าสุด</div>
+    <div id="cash-history"></div>
   </section>
 
 </div>
@@ -556,7 +596,7 @@ async function api(action, data){
 }
 
 function show(id){
-  ['login','register','home','stock','stockcat','clock','report','admin'].forEach(s=>document.getElementById('screen-'+s).classList.add('hidden'));
+  ['login','register','home','stock','stockcat','clock','report','admin','cash'].forEach(s=>document.getElementById('screen-'+s).classList.add('hidden'));
   document.getElementById('screen-'+id).classList.remove('hidden');
   window.scrollTo(0,0);
 }
@@ -595,6 +635,7 @@ function enterHome(){
   chip.textContent = ROLE_TH[ME.role] || ME.role;
   chip.className = 'chip ' + ME.role;
   document.getElementById('ho-admin-sect').classList.toggle('hidden', !ME.is_admin);
+  document.getElementById('ho-cash-tile').classList.toggle('hidden', !(ME.is_admin || ME.team === 'service'));
   show('home');
 }
 
@@ -997,6 +1038,76 @@ async function openReport(){
       <span class="muted" style="font-size:13px">${e.still_in?'🟢 อยู่ในร้าน':(e.worked?('รวม '+e.worked):'')}</span></div>
     <div class="muted" style="font-size:14px;margin-top:6px">เข้า ${e.firstIn?e.firstIn.slice(0,5):'—'} · ออก ${e.lastOut?e.lastOut.slice(0,5):'—'} · ${e.punches.length} ครั้ง</div>
   </div>`).join('');
+}
+
+/* ---------- เงินสด (Service + ผู้ดูแล) ---------- */
+function openCash(){
+  if(!(ME && (ME.is_admin || ME.team==='service'))){ alert('เมนูนี้สำหรับทีม Service และผู้ดูแลเท่านั้น'); return; }
+  document.getElementById('cash-datelabel').textContent=thaiDateNow();
+  var di=document.getElementById('cash-date'); if(!di.value) di.value=todayISO();
+  if(!document.querySelector('#cash-payouts .cash-line')) cashAddLine();
+  cashCalc();
+  loadCashList();
+  show('cash');
+}
+function todayISO(){ var d=new Date(),p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+function cashLineHtml(note,amt){
+  return '<div class="cash-line" style="display:flex;gap:8px;margin-bottom:8px">'+
+    '<input type="text" class="cash-pnote" placeholder="รายการ เช่น ซื้อผัก" value="'+esc(note||'')+'" style="flex:1;min-width:0">'+
+    '<input type="number" inputmode="decimal" class="cash-pamt" placeholder="0" value="'+(amt!=null&&amt!==''?esc(amt):'')+'" oninput="cashCalc()" style="width:92px;flex:0 0 auto">'+
+    '<button type="button" class="btn ghost sm" title="ลบ" onclick="this.parentNode.remove();cashCalc()" style="flex:0 0 auto;padding:9px 12px">✕</button>'+
+  '</div>';
+}
+function cashAddLine(note,amt){ document.getElementById('cash-payouts').insertAdjacentHTML('beforeend', cashLineHtml(note,amt)); }
+function cashCollect(){
+  var out=[];
+  document.querySelectorAll('#cash-payouts .cash-line').forEach(function(ln){
+    var note=ln.querySelector('.cash-pnote').value.trim();
+    var amt=parseFloat(ln.querySelector('.cash-pamt').value)||0;
+    if(note||amt) out.push({note:note, amt:amt});
+  });
+  return out;
+}
+function cashCalc(){
+  var pt=cashCollect().reduce(function(s,x){return s+(x.amt||0);},0);
+  var sales=parseFloat(document.getElementById('cash-sales').value)||0;
+  var wd=parseFloat(document.getElementById('cash-withdraw').value)||0;
+  document.getElementById('cash-ptotal').textContent=pt.toLocaleString('en-US');
+  document.getElementById('cash-net').textContent=(sales-pt-wd).toLocaleString('en-US');
+}
+async function sendCash(){
+  var m=document.getElementById('cash-msg'); clearMsg(m);
+  var date=document.getElementById('cash-date').value;
+  if(!date){ msg(m,'กรุณาเลือกวันที่'); return; }
+  var btn=document.getElementById('cash-send'); busy(btn,true);
+  var r=await api('cashSave',{
+    date:date,
+    cash_sales:parseFloat(document.getElementById('cash-sales').value)||0,
+    payouts:cashCollect(),
+    withdraw:parseFloat(document.getElementById('cash-withdraw').value)||0,
+    cash:parseFloat(document.getElementById('cash-cash').value)||0,
+    note:document.getElementById('cash-note').value
+  });
+  busy(btn,false,'บันทึกเงินสด');
+  if(!r.ok){ msg(m, r.error||'บันทึกไม่สำเร็จ'); return; }
+  msg(m,'✅ บันทึกเงินสดวันที่ '+r.date+' เรียบร้อย'+(r.updated?' (อัปเดตของเดิม)':''),'ok');
+  loadCashList();
+}
+async function loadCashList(){
+  var box=document.getElementById('cash-history');
+  box.innerHTML='<div class="center muted" style="padding:14px"><span class="spinner"></span></div>';
+  var r=await api('cashList',{limit:20});
+  if(!r.ok){ box.innerHTML='<div class="card center muted">'+esc(r.error||'โหลดไม่สำเร็จ')+'</div>'; return; }
+  if(!r.rows||!r.rows.length){ box.innerHTML='<div class="card center muted">ยังไม่มีบันทึก</div>'; return; }
+  box.innerHTML=r.rows.map(function(x){
+    var pl=(x.payouts||[]).map(function(o){return esc(o.note||'-')+' '+Number(o.amt||0).toLocaleString('en-US');}).join(', ');
+    return '<div class="emp"><div class="top"><div>'+
+      '<div class="nm">'+esc(x.date)+'</div>'+
+      '<div class="meta">ขายเงินสด '+Number(x.cash_sales||0).toLocaleString('en-US')+' · จ่ายออก '+Number(x.payout_total||0).toLocaleString('en-US')+' · เบิก '+Number(x.withdraw||0).toLocaleString('en-US')+'</div>'+
+      (pl?('<div class="meta">🧾 '+pl+'</div>'):'')+
+      (x.note?('<div class="meta">📝 '+esc(x.note)+'</div>'):'')+
+      '</div><span class="chip staff">'+esc(x.by||'')+'</span></div></div>';
+  }).join('');
 }
 
 /* ---------- ADMIN: list ---------- */
