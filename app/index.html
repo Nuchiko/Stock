@@ -287,7 +287,47 @@
       <button class="btn" id="li-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
       <div class="msg err" id="li-msg"></div>
     </div>
+    <button class="btn ghost" style="margin-top:14px" onclick="openRegister()">ลงทะเบียนพนักงานใหม่</button>
     <div class="footnote">ลืม PIN? แจ้งเจ้าของ/ผู้จัดการให้รีเซ็ตให้</div>
+  </section>
+
+  <!-- ============ REGISTER ============ -->
+  <section id="screen-register" class="hidden">
+    <button class="backbtn" onclick="show('login')">‹ กลับเข้าสู่ระบบ</button>
+    <div class="topbar" style="padding-top:0"><div class="who">ลงทะเบียนพนักงาน</div></div>
+    <div class="card">
+      <div class="hint" style="font-size:13px;color:var(--muted);margin-bottom:8px">กรอกข้อมูลของตัวเอง แล้วรอผู้ดูแลอนุมัติก่อนเข้าใช้งาน</div>
+      <label>ชื่อ–สกุล</label>
+      <input id="rg-name" type="text" placeholder="เช่น สมชาย ใจดี">
+      <label>ชื่อเล่น</label>
+      <input id="rg-nick" type="text" placeholder="เช่น ชาย">
+      <label>เบอร์มือถือ</label>
+      <input id="rg-phone" type="tel" inputmode="numeric" placeholder="08x-xxx-xxxx" maxlength="15">
+      <div class="row2">
+        <div>
+          <label>ทีม</label>
+          <select id="rg-team">
+            <option value="">— เลือก —</option>
+            <option value="service">Service</option>
+            <option value="kitchen">ครัว</option>
+          </select>
+        </div>
+        <div>
+          <label>สถานะ</label>
+          <select id="rg-emptype">
+            <option value="">— เลือก —</option>
+            <option value="permanent">พนักงานประจำ</option>
+            <option value="probation">ทดลองงาน</option>
+          </select>
+        </div>
+      </div>
+      <label>ตั้ง PIN (4–6 หลัก)</label>
+      <input id="rg-pin" class="pin-input" type="password" inputmode="numeric" placeholder="••••" maxlength="6">
+      <label>ยืนยัน PIN</label>
+      <input id="rg-pin2" class="pin-input" type="password" inputmode="numeric" placeholder="••••" maxlength="6">
+      <button class="btn" id="rg-btn" onclick="doRegister()">ลงทะเบียน</button>
+      <div class="msg" id="rg-msg"></div>
+    </div>
   </section>
 
   <!-- ============ HOME ============ -->
@@ -427,6 +467,24 @@
         </select>
       </div>
     </div>
+    <div class="row2">
+      <div>
+        <label>ทีม</label>
+        <select id="m-team">
+          <option value="">—</option>
+          <option value="service">Service</option>
+          <option value="kitchen">ครัว</option>
+        </select>
+      </div>
+      <div>
+        <label>สถานะ</label>
+        <select id="m-emptype">
+          <option value="">—</option>
+          <option value="permanent">ประจำ</option>
+          <option value="probation">ทดลองงาน</option>
+        </select>
+      </div>
+    </div>
     <label id="m-pin-label">ตั้ง PIN (4–6 หลัก)</label>
     <input id="m-pin" class="pin-input" type="text" inputmode="numeric" placeholder="••••" maxlength="6">
     <button class="btn" id="m-save" onclick="saveEmp()">บันทึก</button>
@@ -476,6 +534,8 @@ const SHEET_URL = (IS_DEV ? ENV.dev : ENV.prod).stock;
 /* ================================================== */
 
 const ROLE_TH = {owner:'เจ้าของ', manager:'ผู้จัดการ', staff:'พนักงาน'};
+const TEAM_TH = {service:'Service', kitchen:'ครัว'};
+const EMPTYPE_TH = {permanent:'ประจำ', probation:'ทดลองงาน'};
 let ME = null;            // ข้อมูลผู้ใช้ที่ล็อกอินอยู่
 let EMP_CACHE = [];       // รายชื่อพนักงาน (หน้า admin)
 let editingId = null;     // emp_id ที่กำลังแก้ (null = เพิ่มใหม่)
@@ -496,7 +556,7 @@ async function api(action, data){
 }
 
 function show(id){
-  ['login','home','stock','stockcat','clock','report','admin'].forEach(s=>document.getElementById('screen-'+s).classList.add('hidden'));
+  ['login','register','home','stock','stockcat','clock','report','admin'].forEach(s=>document.getElementById('screen-'+s).classList.add('hidden'));
   document.getElementById('screen-'+id).classList.remove('hidden');
   window.scrollTo(0,0);
 }
@@ -545,6 +605,36 @@ function logout(){
   show('login');
 }
 
+/* ---------- REGISTER (ลงทะเบียนตัวเอง) ---------- */
+function openRegister(){
+  ['rg-name','rg-nick','rg-phone','rg-pin','rg-pin2'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('rg-team').value=''; document.getElementById('rg-emptype').value='';
+  clearMsg(document.getElementById('rg-msg'));
+  show('register');
+}
+async function doRegister(){
+  const m=document.getElementById('rg-msg'); clearMsg(m);
+  const name=document.getElementById('rg-name').value.trim();
+  const nick=document.getElementById('rg-nick').value.trim();
+  const phone=document.getElementById('rg-phone').value.replace(/\D/g,'');
+  const team=document.getElementById('rg-team').value;
+  const emp_type=document.getElementById('rg-emptype').value;
+  const pin=document.getElementById('rg-pin').value;
+  const pin2=document.getElementById('rg-pin2').value;
+  if(!name){ msg(m,'กรุณากรอกชื่อ'); return; }
+  if(phone.length<9){ msg(m,'เบอร์ไม่ถูกต้อง'); return; }
+  if(!team){ msg(m,'กรุณาเลือกทีม'); return; }
+  if(!emp_type){ msg(m,'กรุณาเลือกสถานะ'); return; }
+  if(pin.length<4){ msg(m,'PIN ต้องอย่างน้อย 4 หลัก'); return; }
+  if(pin!==pin2){ msg(m,'PIN สองช่องไม่ตรงกัน'); return; }
+  const btn=document.getElementById('rg-btn'); busy(btn,true);
+  const r=await api('register',{name,nickname:nick,phone,team,emp_type,pin});
+  busy(btn,false,'ลงทะเบียน');
+  if(!r.ok){ msg(m,r.error||'ลงทะเบียนไม่สำเร็จ'); return; }
+  msg(m,'✅ ลงทะเบียนเรียบร้อย รอผู้ดูแลอนุมัติก่อนเข้าใช้งาน','ok');
+  setTimeout(()=>show('login'), 1900);
+}
+
 /* ---------- MODULE TILES ---------- */
 const STOCK_GROUPS=[
   {name:'ปลาดิบ', icon:'🐟', cut:true, items:[
@@ -555,35 +645,59 @@ const STOCK_GROUPS=[
     {n:'เบียร์สดสิงห์',u:'ถัง',img:'singha-draft',e:'🍺',sub:'เบียร์'},
     {n:'เบียร์สิงห์ขวด 620ml',u:'ขวด',img:'singha-620',e:'🍺',sub:'เบียร์'},
     {n:'Sapporo เบียร์สด 20L',u:'ถัง',img:'sapporo-draft',e:'🍺',sub:'เบียร์'},
-    {n:'Wila Weizen 20L',u:'ถัง',img:'wila-weizen',e:'🍺',sub:'เบียร์'},
-    {n:'Crispy Boy Lager',u:'กระป๋อง',img:'crispy-boy',e:'🥫',sub:'เบียร์'},
-    {n:'Whale Pale Ale',u:'กระป๋อง',img:'whale-pale-ale',e:'🥫',sub:'เบียร์'},
-    {n:'Raven IPA',u:'กระป๋อง',img:'raven-ipa',e:'🥫',sub:'เบียร์'},
-    {n:'Anan Hazy IPA',u:'กระป๋อง',img:'anan-hazy-ipa',e:'🥫',sub:'เบียร์'},
-    {n:'Erdinger Weissbier',u:'ขวด',img:'erdinger-weissbier',e:'🍺',sub:'เบียร์'},
-    {n:'Erdinger Dunkel',u:'ขวด',img:'erdinger-dunkel',e:'🍺',sub:'เบียร์'},
-    {n:'Vana Pomegranate',u:'ขวด',img:'vana-pomegranate',e:'🍺',sub:'เบียร์'},
-    // 🥃 วิสกี้ (รวมบรั่นดี Regency ตามเมนู)
-    {n:'Kakubin 700ml',u:'ขวด',img:'kakubin',e:'🥃',sub:'วิสกี้'},
-    {n:'Regency บรั่นดี',u:'ขวด',img:'regency',e:'🥃',sub:'วิสกี้'},
-    // 🍑 อุเมะชุ / ยูซุ
-    {n:'Kotsuzumi Plumtonic 1500ml',u:'ขวด',img:'kotsuzumi-plumtonic',e:'🍑',sub:'อุเมะชุ / ยูซุ'},
-    {n:'Shio Yuzu 720ml',u:'ขวด',img:'shio-yuzu-720',e:'🍋',sub:'อุเมะชุ / ยูซุ'},
-    {n:'Shio Yuzu 1800ml',u:'ขวด',img:'shio-yuzu-1800',e:'🍋',sub:'อุเมะชุ / ยูซุ'},
-    // 🥤 ซอฟต์ดริงก์ (น้ำ/โซดา/โค้ก/ชา/น้ำแข็ง)
-    {n:'โซดาสิงห์ 400cc',u:'ขวด',img:'singha-soda',e:'🫧',sub:'ซอฟต์ดริงก์'},
-    {n:'สิงห์ น้ำดื่ม 600ml',u:'ขวด',img:'singha-water',e:'💧',sub:'ซอฟต์ดริงก์'},
-    {n:'โค้ก',u:'กระป๋อง',img:'coke',e:'🥤',sub:'ซอฟต์ดริงก์'},
-    {n:'โค้ก Zero',u:'กระป๋อง',img:'coke-zero',e:'🥤',sub:'ซอฟต์ดริงก์'},
-    {n:'Oolong Tea 500ml',u:'ขวด',img:'oolong-tea',e:'🍵',sub:'ซอฟต์ดริงก์'},
-    {n:'น้ำแข็ง',u:'ถุง',img:'ice',e:'🧊',sub:'ซอฟต์ดริงก์'},
-    // 🍶 โชจู
+    // 🍻 เบียร์คราฟต์ (Beervana)
+    {n:'Wila Weizen 20L',u:'ถัง',img:'wila-weizen',e:'🍺',sub:'เบียร์คราฟต์'},
+    {n:'Crispy Boy Lager',u:'กระป๋อง',img:'crispy-boy',e:'🥫',sub:'เบียร์คราฟต์'},
+    {n:'Whale Pale Ale',u:'กระป๋อง',img:'whale-pale-ale',e:'🥫',sub:'เบียร์คราฟต์'},
+    {n:'Raven IPA',u:'กระป๋อง',img:'raven-ipa',e:'🥫',sub:'เบียร์คราฟต์'},
+    {n:'Anan Hazy IPA',u:'กระป๋อง',img:'anan-hazy-ipa',e:'🥫',sub:'เบียร์คราฟต์'},
+    {n:'Erdinger Weissbier',u:'ขวด',img:'erdinger-weissbier',e:'🍺',sub:'เบียร์คราฟต์'},
+    {n:'Erdinger Dunkel',u:'ขวด',img:'erdinger-dunkel',e:'🍺',sub:'เบียร์คราฟต์'},
+    {n:'Vana Pomegranate',u:'ขวด',img:'vana-pomegranate',e:'🍺',sub:'เบียร์คราฟต์'},
+    // 🥃 วิสกี้ (เมนูหน้า 1 — Bottle ; รวม Regency ตามเมนู)
+    {n:'Suntory Kakubin 700ml',u:'ขวด',img:'kakubin',e:'🥃',sub:'วิสกี้'},
+    {n:'Jim Beam 700ml',u:'ขวด',img:'jim-beam',e:'🥃',sub:'วิสกี้'},
+    {n:'Regency 350ml',u:'ขวด',img:'regency',e:'🥃',sub:'วิสกี้'},
+    // 🍑 อุเมะชุ (Kotsuzumi Plumtonic Baishin) — เมนูหน้า 2
+    {n:'Kotsuzumi Plumtonic Baishin 1.5L',u:'ขวด',img:'kotsuzumi-plumtonic',e:'🍑',sub:'อุเมะชุ'},
+    // 🍋 ยูซุ (Shio Yuzu / Citrus) — เมนูหน้า 2
+    {n:'Shio Yuzu / Citrus 720ml',u:'ขวด',img:'shio-yuzu-720',e:'🍋',sub:'ยูซุ'},
+    {n:'Shio Yuzu / Citrus 1.8L',u:'ขวด',img:'shio-yuzu-1800',e:'🍋',sub:'ยูซุ'},
+    // 🥤 ซอฟต์ดริงก์ (เมนูหน้า 2 — ของที่สต็อกเป็นขวด/กระป๋อง/ถุง)
+    {n:'Water (สิงห์ น้ำดื่ม)',u:'ขวด',img:'singha-water',e:'💧',sub:'ซอฟต์ดริงก์'},
+    {n:'Soda (โซดาสิงห์)',u:'ขวด',img:'singha-soda',e:'🫧',sub:'ซอฟต์ดริงก์'},
+    {n:'Coke',u:'กระป๋อง',img:'coke',e:'🥤',sub:'ซอฟต์ดริงก์'},
+    {n:'Coke Zero',u:'กระป๋อง',img:'coke-zero',e:'🥤',sub:'ซอฟต์ดริงก์'},
+    {n:'Calpis',u:'ขวด',img:'calpis',e:'🥛',sub:'ซอฟต์ดริงก์'},
+    {n:'Tonic',u:'ขวด',img:'tonic',e:'🥤',sub:'ซอฟต์ดริงก์'},
+    {n:'Green Tea',u:'ขวด',img:'green-tea',e:'🍵',sub:'ซอฟต์ดริงก์'},
+    {n:'Oolong Tea',u:'ขวด',img:'oolong-tea',e:'🍵',sub:'ซอฟต์ดริงก์'},
+    {n:'Ice (น้ำแข็ง)',u:'ถุง',img:'ice',e:'🧊',sub:'ซอฟต์ดริงก์'},
+    // 🍶 โชจู (เมนูหน้า 3 — Shochu Bottle ครบ 9 ตัว)
+    {n:'Kiccho Houzan 720ml',u:'ขวด',img:'kiccho-houzan',e:'🍶',sub:'โชจู'},
+    {n:'Daiyame 900ml',u:'ขวด',img:'daiyame',e:'🍶',sub:'โชจู'},
+    {n:'Yasuda Imo 720ml',u:'ขวด',img:'yasuda-imo',e:'🍶',sub:'โชจู'},
+    {n:'Mitake Imo 900ml',u:'ขวด',img:'mitake',e:'🍶',sub:'โชจู'},
+    {n:'Nikaido Mugi 900ml',u:'ขวด',img:'nikaido-mugi',e:'🍶',sub:'โชจู'},
+    {n:'Shirozaru 900ml',u:'ขวด',img:'shirozaru',e:'🍶',sub:'โชจู'},
     {n:'Kuro Kirishima 900ml',u:'ขวด',img:'kuro-kirishima',e:'🍶',sub:'โชจู'},
-    {n:'Mitake 900ml',u:'ขวด',img:'mitake',e:'🍶',sub:'โชจู'},
-    // 🍶 สาเก
-    {n:'Inata Hime 300ml',u:'ขวด',img:'inata-hime',e:'🍶',sub:'สาเก'},
-    {n:'Born Junsui 300ml',u:'ขวด',img:'born-junsui',e:'🍶',sub:'สาเก'},
+    {n:'Shirozaru 1.8L',u:'ขวด',img:'shirozaru-1800',e:'🍶',sub:'โชจู'},
+    {n:'Kinpou Makotozake 1.8L',u:'ขวด',img:'kinpou',e:'🍶',sub:'โชจู'},
+    // 🍶 สาเก (เมนูหน้า 4 — 300ml 6 ตัว + 720ml 7 ตัว + Hakutsuru)
+    {n:'Hanzo Junmai Daiginjo 300ml',u:'ขวด',img:'hanzo-daiginjo',e:'🍶',sub:'สาเก'},
     {n:'Hanzo Karakuchi 300ml',u:'ขวด',img:'hanzo-karakuchi',e:'🍶',sub:'สาเก'},
+    {n:'Born Junmai Daiginjo 300ml',u:'ขวด',img:'born-junsui',e:'🍶',sub:'สาเก'},
+    {n:'Inatahime Junmai Ginjo 300ml',u:'ขวด',img:'inata-hime',e:'🍶',sub:'สาเก'},
+    {n:'Manozuru Karakuchi 300ml',u:'ขวด',img:'manozuru',e:'🍶',sub:'สาเก'},
+    {n:'Tanigawadake Chokara 300ml',u:'ขวด',img:'tanigawadake',e:'🍶',sub:'สาเก'},
+    {n:'Hiyashibori Ginjo 720ml',u:'ขวด',img:'hiyashibori',e:'🍶',sub:'สาเก'},
+    {n:'Kamozuru Junmai 720ml',u:'ขวด',img:'kamozuru',e:'🍶',sub:'สาเก'},
+    {n:'Kokuryu Junmai Ginjo 720ml',u:'ขวด',img:'kokuryu',e:'🍶',sub:'สาเก'},
+    {n:'Zaku Miyabi Junmai Ginjo 720ml',u:'ขวด',img:'zaku-miyabi',e:'🍶',sub:'สาเก'},
+    {n:'Maboroshi Junmai Ginjo 720ml',u:'ขวด',img:'maboroshi',e:'🍶',sub:'สาเก'},
+    {n:'Dassai 45 Junmai Daiginjo 720ml',u:'ขวด',img:'dassai45',e:'🍶',sub:'สาเก'},
+    {n:'Ozeki Taru Sake 1.8L',u:'ขวด',img:'ozeki-taru',e:'🍶',sub:'สาเก'},
+    {n:'Hakutsuru (ร้อน/เย็น)',u:'ขวด',img:'hakutsuru',e:'🍶',sub:'สาเก'},
     // 🍷 ไวน์ (ไม่อยู่ในเมนูเครื่องดื่ม แต่มีสต็อก)
     {n:'Sauvignon Blanc',u:'ขวด',img:'sauvignon-blanc',e:'🍷',sub:'ไวน์'},
     {n:'Bordeaux',u:'ขวด',img:'bordeaux',e:'🍷',sub:'ไวน์'},
@@ -607,10 +721,12 @@ STOCK_GROUPS.forEach(function(g){ g.items.forEach(function(it){
   var o=(typeof it==='object')?it:{};
   STOCK_FLAT.push({name:nm, unit:o.u||'', hotate:!!o.hotate||nm==='Hotate', cut:!!g.cut, count:!!g.count, img:o.img||'', e:o.e||g.icon});
 }); });
-const DRINK_SUBS=[   // กลุ่มย่อยตามเมนูเครื่องดื่มของร้าน (Beer→Whisky→Umeshu/Yuzu→Soft→Shochu→Sake) + ไวน์
+const DRINK_SUBS=[   // กลุ่มย่อยตามเมนูร้านจริง: Beer→Whisky→Kotsuzumi(อุเมะชุ)→ShioYuzu(ยูซุ)→Soft→Shochu→Sake + เบียร์คราฟต์(Beervana) + ไวน์
   {name:'เบียร์',icon:'🍺'},
+  {name:'เบียร์คราฟต์',icon:'🍻'},
   {name:'วิสกี้',icon:'🥃'},
-  {name:'อุเมะชุ / ยูซุ',icon:'🍑'},
+  {name:'อุเมะชุ',icon:'🍑'},
+  {name:'ยูซุ',icon:'🍋'},
   {name:'ซอฟต์ดริงก์',icon:'🥤'},
   {name:'โชจู',icon:'🍶'},
   {name:'สาเก',icon:'🍶'},
@@ -907,7 +1023,8 @@ function renderEmployees(){
         <div>
           <div class="nm">${esc(nm)}</div>
           <div class="meta">📱 ${esc(fmtPhone(e.phone))}</div>
-          <div class="meta"><span class="dot ${e.active?'on':'off'}"></span>${e.active?'ใช้งาน':'ปิดใช้งาน'}</div>
+          <div class="meta">${TEAM_TH[e.team]||'—'} · ${EMPTYPE_TH[e.emp_type]||'—'}</div>
+          <div class="meta"><span class="dot ${e.active?'on':'off'}"></span>${e.active?'ใช้งาน':'⏳ รออนุมัติ'}</div>
         </div>
         <span class="chip ${e.role}">${ROLE_TH[e.role]||e.role}</span>
       </div>
@@ -928,6 +1045,8 @@ function openEmpModal(id){
   document.getElementById('m-nick').value  = e ? (e.nickname||'') : '';
   document.getElementById('m-phone').value = e ? fmtPhone(e.phone) : '';
   document.getElementById('m-role').value  = e ? e.role : 'staff';
+  document.getElementById('m-team').value  = e ? (e.team||'') : '';
+  document.getElementById('m-emptype').value = e ? (e.emp_type||'') : '';
   document.getElementById('m-active').value = e ? (e.active?'1':'0') : '1';
   document.getElementById('m-active-wrap').classList.toggle('hidden', !e);
   document.getElementById('m-pin').value = '';
@@ -944,6 +1063,8 @@ async function saveEmp(){
   const nick  = document.getElementById('m-nick').value.trim();
   const phone = document.getElementById('m-phone').value.replace(/\D/g,'');
   const role  = document.getElementById('m-role').value;
+  const team  = document.getElementById('m-team').value;
+  const emp_type = document.getElementById('m-emptype').value;
   const pin   = document.getElementById('m-pin').value.trim();
   const btn = document.getElementById('m-save');
 
@@ -952,13 +1073,13 @@ async function saveEmp(){
   busy(btn,true);
   if(editingId){
     const active = document.getElementById('m-active').value;
-    const payload = {emp_id:editingId, name, nickname:nick, role, active:active==='1'};
+    const payload = {emp_id:editingId, name, nickname:nick, role, team, emp_type, active:active==='1'};
     if(pin) payload.newPin = pin;
     r = await api('updateEmployee', payload);
   }else{
     if(phone.length<9){ busy(btn,false,'บันทึก'); msg(m,'เบอร์ไม่ถูกต้อง'); return; }
     if(pin.length<4){ busy(btn,false,'บันทึก'); msg(m,'PIN ต้องอย่างน้อย 4 หลัก'); return; }
-    r = await api('addEmployee', {name, nickname:nick, phone, role, pin});
+    r = await api('addEmployee', {name, nickname:nick, phone, role, team, emp_type, pin});
   }
   busy(btn,false,'บันทึก');
   if(!r.ok){ msg(m, r.error||'บันทึกไม่สำเร็จ'); return; }
