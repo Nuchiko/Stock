@@ -142,7 +142,7 @@ function calcUsed(i, isHotate) {
     var ob=parseInt(document.getElementById('old_'+i+'_box').value)||0, op=parseInt(document.getElementById('old_'+i+'_pc').value)||0;
     var ib=parseInt(document.getElementById('in_'+i+'_box').value)||0, ip=parseInt(document.getElementById('in_'+i+'_pc').value)||0;
     var rb=parseInt(document.getElementById('rem_'+i+'_box').value)||0, rp=parseInt(document.getElementById('rem_'+i+'_pc').value)||0;
-    var BOX=30; cell.textContent = ((ob*BOX+op)+(ib*BOX+ip)-(rb*BOX+rp))+'ตัว';
+    var BOX=35; cell.textContent = ((ob*BOX+op)+(ib*BOX+ip)-(rb*BOX+rp))+'ตัว';
   } else {
     var o=parseInt(document.getElementById('old_'+i).value)||0, n=parseInt(document.getElementById('in_'+i).value)||0;
     var c=parseInt(document.getElementById('cut_'+i).value)||0, r=parseInt(document.getElementById('rem_'+i).value)||0;
