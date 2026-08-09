@@ -346,9 +346,13 @@
 
     <div class="sect-title">ระบบงาน</div>
     <div class="grid">
-      <div class="tile" onclick="openStock()" style="grid-column:1/-1">
+      <div class="tile" onclick="openStock()">
         <div class="ico">📦</div>
         <div><div class="tname">Stock</div><div class="tdesc">กรอกสต็อกประจำวัน</div></div>
+      </div>
+      <div class="tile" onclick="openClock()">
+        <div class="ico">🕘</div>
+        <div><div class="tname">เวลาเข้างาน</div><div class="tdesc">เข้า–ออกงาน</div></div>
       </div>
       <div class="tile hidden" id="ho-cash-tile" onclick="openCash()" style="grid-column:1/-1">
         <div class="ico">💵</div>
@@ -750,7 +754,7 @@ const STOCK_GROUPS=[
   {name:'ผัก', icon:'🥬', cut:false, items:[]},
   {name:'เนื้อสัตว์', icon:'🥩', cut:false, items:[]}
 ];
-const HOTATE_BOX=30;
+const HOTATE_BOX=35;
 let stCurrentGroup=0;
 let DRINK_PHOTOS={};          // slug -> URL รูปที่อัปไว้ (จากเซิร์ฟเวอร์ Mana App)
 let DRINK_UPLOAD_ON=false;    // เปิดปุ่ม 📷 อัปรูป = true หลัง deploy หลังบ้าน (มีคำสั่ง setDrinkPhoto)
@@ -1124,26 +1128,38 @@ async function openAdmin(){
 function renderEmployees(){
   const box = document.getElementById('emp-list');
   if(!EMP_CACHE.length){ box.innerHTML = '<div class="card center muted">ยังไม่มีพนักงาน</div>'; return; }
-  // เรียง: admin ก่อน แล้วตามชื่อ
+  // เรียง: คนรออนุมัติขึ้นก่อน แล้ว admin แล้วตามชื่อ
   const order = {owner:0, manager:1, staff:2};
-  const list = EMP_CACHE.slice().sort((a,b)=> (order[a.role]-order[b.role]) || String(a.name).localeCompare(String(b.name),'th'));
-  box.innerHTML = list.map(e=>{
+  const list = EMP_CACHE.slice().sort((a,b)=> (Number(!!a.active)-Number(!!b.active)) || (order[a.role]-order[b.role]) || String(a.name).localeCompare(String(b.name),'th'));
+  const pending = EMP_CACHE.filter(e=>!e.active).length;
+  const head = pending ? '<div class="msg show ok" style="margin:0 0 12px">⏳ รออนุมัติ '+pending+' คน — กด "อนุมัติ" เพื่อเปิดให้เข้าใช้งาน</div>' : '';
+  box.innerHTML = head + list.map(e=>{
     const nm = e.nickname ? (e.nickname+' · '+e.name) : e.name;
     return `<div class="emp">
       <div class="top">
         <div>
           <div class="nm">${esc(nm)}</div>
-          <div class="meta">📱 ${esc(fmtPhone(e.phone))}</div>
+          <div class="meta">📱 <a href="tel:${esc(String(e.phone||'').replace(/\D/g,''))}" style="color:inherit">${esc(fmtPhone(e.phone))}</a></div>
           <div class="meta">${TEAM_TH[e.team]||'—'} · ${EMPTYPE_TH[e.emp_type]||'—'}</div>
-          <div class="meta"><span class="dot ${e.active?'on':'off'}"></span>${e.active?'ใช้งาน':'⏳ รออนุมัติ'}</div>
+          <div class="meta"><span class="dot ${e.active?'on':'off'}"></span>${e.active?'ใช้งาน':'⏳ รออนุมัติ / ปิดใช้งาน'}</div>
         </div>
         <span class="chip ${e.role}">${ROLE_TH[e.role]||e.role}</span>
       </div>
       <div class="acts">
+        ${e.active?'':`<button class="btn sm" onclick='quickApprove(${JSON.stringify(e.emp_id)})'>✅ อนุมัติ</button>`}
         <button class="btn ghost sm" onclick='openEmpModal(${JSON.stringify(e.emp_id)})'>แก้ไข</button>
       </div>
     </div>`;
   }).join('');
+}
+
+async function quickApprove(id){
+  const e = EMP_CACHE.find(x=>x.emp_id===id); if(!e) return;
+  if(!confirm('อนุมัติ "'+(e.nickname||e.name)+'" ให้เข้าใช้งานระบบ?')) return;
+  const r = await api('updateEmployee', {emp_id:e.emp_id, name:e.name, nickname:e.nickname||'',
+    role:e.role||'staff', team:e.team||'', emp_type:e.emp_type||'', active:true});
+  if(!r.ok){ alert(r.error||'อนุมัติไม่สำเร็จ ลองใหม่อีกครั้ง'); return; }
+  openAdmin();
 }
 
 /* ---------- ADMIN: add/edit modal ---------- */
